@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">联系人导入&amp;导出</string>
+    <string name="search">搜索</string>
+    <string name="clear_search">清除搜索</string>
+    <string name="export_contacts">导出联系人</string>
+    <string name="import_contacts">导入联系人</string>
+    <string name="sync_contacts">同步联系人</string>
+    <string name="more">更多</string>
+    <string name="import_title">导入</string>
+    <string name="export_title">导出</string>
+    <string name="no_contacts_to_export">未找到联系人。按“同步”加载要导出的联系人。</string>
+    <string name="sync">同步</string>
+    <string name="file_selection_failed">文件选择失败</string>
+    <string name="select_all">全选</string>
+    <string name="deselect_all">取消全选</string>
+    <string name="no_contacts_selected">未选择联系人</string>
+    <string name="import_selected_contacts">导入所选联系人：</string>
+    <string name="no_contacts_to_import">这里还没有联系人。按“导入”添加您的联系人。</string>
+    <string name="export_selected_contacts">导出所选联系人：</string>
+    <string name="add_contacts_failed">添加联系人时出错</string>
+    <string name="add_contacts_success">联系人添加成功</string>
+
+</resources>

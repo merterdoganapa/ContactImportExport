@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Kişi İçe &amp; Dışa Aktarma</string>
+    <string name="search">Ara</string>
+    <string name="clear_search">Aramayı Temizle</string>
+    <string name="export_contacts">Kişileri Dışa Aktar</string>
+    <string name="import_contacts">Kişileri İçe Aktar</string>
+    <string name="sync_contacts">Kişileri Senkronize Et</string>
+    <string name="more">Daha Fazla</string>
+    <string name="import_title">İçe Aktar</string>
+    <string name="export_title">Dışa Aktar</string>
+    <string name="no_contacts_to_export">Dışa aktarılacak kişi bulunamadı. Kişileri yüklemek için \'Senkronize Et\' tuşuna basın.</string>
+    <string name="sync">Senkronize Et</string>
+    <string name="file_selection_failed">Dosya seçimi başarısız</string>
+    <string name="select_all">Tümünü Seç</string>
+    <string name="deselect_all">Seçimleri Kaldır</string>
+    <string name="no_contacts_selected">Hiçbir kişi seçilmedi</string>
+    <string name="import_selected_contacts">Seçilen kişileri içe aktar:</string>
+    <string name="no_contacts_to_import">Henüz burada kişi yok. Kişileri getirmek için \İçe Aktar\ tuşuna basın.</string>
+    <string name="export_selected_contacts">Seçilen kişileri dışarı aktar:</string>
+    <string name="add_contacts_failed">Kişiler eklenirken hata oluştu</string>
+    <string name="add_contacts_success">Kişiler başarıyla eklendi</string>
+
+</resources>

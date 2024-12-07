@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Импорт и Экспорт Контактов</string>
+    <string name="search">Поиск</string>
+    <string name="clear_search">Очистить поиск</string>
+    <string name="export_contacts">Экспорт контактов</string>
+    <string name="import_contacts">Импорт контактов</string>
+    <string name="sync_contacts">Синхронизировать контакты</string>
+    <string name="more">Еще</string>
+    <string name="import_title">Импорт</string>
+    <string name="export_title">Экспорт</string>
+    <string name="no_contacts_to_export">Контакты не найдены. Нажмите «Синхронизировать», чтобы загрузить контакты для экспорта.</string>
+    <string name="sync">Синхронизировать</string>
+    <string name="file_selection_failed">Ошибка выбора файла</string>
+    <string name="select_all">Выбрать все</string>
+    <string name="deselect_all">Отменить выбор всех</string>
+    <string name="no_contacts_selected">Контакты не выбраны</string>
+    <string name="import_selected_contacts">Импорт выбранных контактов:</string>
+    <string name="no_contacts_to_import">Здесь пока нет контактов. Нажмите «Импорт», чтобы добавить контакты.</string>
+    <string name="export_selected_contacts">Экспорт выбранных контактов:</string>
+    <string name="add_contacts_failed">Ошибка добавления контактов</string>
+    <string name="add_contacts_success">Контакты успешно добавлены</string>
+
+</resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">استيراد وتصدير جهات الاتصال</string>
+    <string name="search">بحث</string>
+    <string name="clear_search">مسح البحث</string>
+    <string name="export_contacts">تصدير جهات الاتصال</string>
+    <string name="import_contacts">استيراد جهات الاتصال</string>
+    <string name="sync_contacts">مزامنة جهات الاتصال</string>
+    <string name="more">المزيد</string>
+    <string name="import_title">استيراد</string>
+    <string name="export_title">تصدير</string>
+    <string name="no_contacts_to_export">لم يتم العثور على جهات الاتصال. اضغط على "مزامنة" لتحميل جهات الاتصال للتصدير.</string>
+    <string name="sync">مزامنة</string>
+    <string name="file_selection_failed">فشل في اختيار الملف</string>
+    <string name="select_all">اختيار الكل</string>
+    <string name="deselect_all">إلغاء اختيار الكل</string>
+    <string name="no_contacts_selected">لم يتم اختيار أي جهات اتصال</string>
+    <string name="import_selected_contacts">استيراد جهات الاتصال المحددة:</string>
+    <string name="no_contacts_to_import">لا توجد جهات اتصال هنا بعد. اضغط على "استيراد" لجلب جهات الاتصال.</string>
+    <string name="export_selected_contacts">تصدير جهات الاتصال المحددة:</string>
+    <string name="add_contacts_failed">فشل في إضافة جهات الاتصال</string>
+    <string name="add_contacts_success">تم إضافة جهات الاتصال بنجاح</string>
+
+</resources>

@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">Contact Import&amp;Export</string>
+    <string name="search">Search</string>
+    <string name="clear_search">Clear Search</string>
+    <string name="export_contacts">Export Contacts</string>
+    <string name="import_contacts">Import Contacts</string>
+    <string name="sync_contacts">Sync contacts</string>
+    <string name="more">More</string>
+    <string name="import_title">Import</string>
+    <string name="export_title">Export</string>
+    <string name="no_contacts_to_export">No contacts found. Press \'Sync\' to load your contacts for export.</string>
+    <string name="sync">Sync</string>
+    <string name="file_selection_failed">File selection failed</string>
+    <string name="select_all">Select all</string>
+    <string name="deselect_all">Deselect all</string>
+    <string name="no_contacts_selected">No contacts selected</string>
+    <string name="import_selected_contacts">Import selected contacts:</string>
+    <string name="no_contacts_to_import">There are no contacts here yet. Press \'Import\' to bring in your contacts.</string>
+    <string name="export_selected_contacts">Export selected contacts:</string>
+    <string name="add_contacts_failed">Error adding contacts</string>
+    <string name="add_contacts_success">Contacts added successfully</string>
+</resources>

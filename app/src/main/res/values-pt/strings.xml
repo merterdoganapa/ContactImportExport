@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Importação&amp;Exportação de Contatos</string>
+    <string name="search">Buscar</string>
+    <string name="clear_search">Limpar busca</string>
+    <string name="export_contacts">Exportar contatos</string>
+    <string name="import_contacts">Importar contatos</string>
+    <string name="sync_contacts">Sincronizar contatos</string>
+    <string name="more">Mais</string>
+    <string name="import_title">Importar</string>
+    <string name="export_title">Exportar</string>
+    <string name="no_contacts_to_export">Nenhum contato encontrado. Pressione \'Sincronizar\' para carregar seus contatos para exportação.</string>
+    <string name="sync">Sincronizar</string>
+    <string name="file_selection_failed">Falha na seleção do arquivo</string>
+    <string name="select_all">Selecionar tudo</string>
+    <string name="deselect_all">Desmarcar tudo</string>
+    <string name="no_contacts_selected">Nenhum contato selecionado</string>
+    <string name="import_selected_contacts">Importar contatos selecionados:</string>
+    <string name="no_contacts_to_import">Ainda não há contatos aqui. Pressione \'Importar\' para adicionar seus contatos.</string>
+    <string name="export_selected_contacts">Exportar contatos selecionados:</string>
+    <string name="add_contacts_failed">Erro ao adicionar contatos</string>
+    <string name="add_contacts_success">Contatos adicionados com sucesso</string>
+
+</resources>
