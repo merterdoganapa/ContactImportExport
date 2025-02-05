@@ -1,5 +1,6 @@
 package com.mea.contact_import_export
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -69,6 +70,7 @@ fun AppContent(
 ) {
     val pagerState = rememberPagerState(0, 0F, { 2 })
     val context = LocalContext.current
+    val activity = context as? Activity
 
     Scaffold(
         topBar = {
@@ -82,7 +84,7 @@ fun AppContent(
                             exportContactsViewModel.loadContacts()
                         },
                         onExportClick = {
-                            exportContactsViewModel.exportContacts(context)
+                            activity?.let { exportContactsViewModel.showAdAndExportContacts(it,context) }
                         },
                         onImportClick = {
                             importContactsViewModel.selectVcfFile()

@@ -15,8 +15,8 @@ android {
         applicationId = "com.mea.contact_import_export"
         minSdk = 28
         targetSdk = 34
-        versionCode = 2
-        versionName = "1.1"
+        versionCode = 3
+        versionName = "1.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -31,7 +31,18 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "REWARDED_AD_UNIT_ID", "\"ca-app-pub-8148037787730261/5834821199\"")
+
         }
+        debug {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            buildConfigField("String", "REWARDED_AD_UNIT_ID", "\"ca-app-pub-3940256099942544/5224354917\"")
+        }
+
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -42,6 +53,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -70,11 +82,6 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.hilt.navigation.compose)
 
-    // Retrofit for networking
-    implementation(libs.bundles.ktorBundle)
-    implementation(libs.slf4japi)
-    implementation(libs.slf4jlog4j12)
-
     // Coroutines for asynchronous programming
     implementation(libs.kotlinx.coroutines.android)
 
@@ -85,20 +92,6 @@ dependencies {
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.ui)
     kapt(libs.hilt.compiler)
-
-    // Image loading
-    implementation(libs.coil.compose)
-
-    //View Dependencies
-
-    //Chart
-    implementation(libs.charty)
-
-    // Google Fit API
-    implementation(libs.bundles.googleFitBundle)
-
-    //Exo Player
-    implementation(libs.bundles.exoPlayerBundle)
 
     // Serialization
     implementation(libs.kotlinx.serialization.json)
@@ -111,5 +104,7 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    implementation(libs.play.services.ads)
 
 }

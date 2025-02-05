@@ -1,5 +1,6 @@
 package com.mea.contact_import_export.ui.screens.importcontacts
 
+import android.app.Activity
 import android.app.Application
 import android.content.ContentProviderOperation
 import android.content.Context
@@ -10,6 +11,7 @@ import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.lifecycle.ViewModel
+import com.mea.contact_import_export.data.AdManager
 import com.mea.contact_import_export.data.model.Contact
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,7 +33,8 @@ data class ImportContactsUIState(
 
 @HiltViewModel
 class ImportContactsScreenViewModel @Inject constructor(
-    application: Application
+    application: Application,
+    private val adManager: AdManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ImportContactsUIState())
@@ -203,6 +206,20 @@ class ImportContactsScreenViewModel @Inject constructor(
 
     fun searchContacts(searchText: String) {
         _uiState.update { it.copy(searchText = searchText) }
+    }
+
+    fun showAdAndProcessVcfFile(activity: Activity, context: Activity, uri: Uri) {
+        adManager.showRewardedAd(
+            activity,
+            onRewarded = {
+                processVcfFile(context, uri)
+            },
+            onAdClosed = {
+            },
+            onAdFailedToShow = {
+                processVcfFile(context, uri)
+            }
+        )
     }
 
 }

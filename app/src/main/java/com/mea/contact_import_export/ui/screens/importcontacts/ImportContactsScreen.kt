@@ -1,6 +1,7 @@
 package com.mea.contact_import_export.ui.screens.importcontacts
 
 import android.Manifest
+import android.app.Activity
 import android.app.Activity.RESULT_OK
 import android.content.pm.PackageManager
 import android.widget.Toast
@@ -40,6 +41,7 @@ fun ImportContactsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val activity = context as? Activity
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -56,8 +58,8 @@ fun ImportContactsScreen(
     ) { result ->
         if (result.resultCode == RESULT_OK) {
             val uri = result.data?.data
-            uri?.let {
-                viewModel.processVcfFile(context, it)
+            if (uri != null && activity != null) {
+                viewModel.showAdAndProcessVcfFile(activity, context, uri)
             }
         } else {
             Toast.makeText(context, fileSelectionFailed, Toast.LENGTH_SHORT).show()

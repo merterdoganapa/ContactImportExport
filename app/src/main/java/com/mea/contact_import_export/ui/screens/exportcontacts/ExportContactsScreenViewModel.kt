@@ -1,5 +1,6 @@
 package com.mea.contact_import_export.ui.screens.exportcontacts
 
+import android.app.Activity
 import android.app.Application
 import android.content.ContentResolver
 import android.content.Context
@@ -9,6 +10,7 @@ import android.provider.ContactsContract
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mea.contact_import_export.data.AdManager
 import com.mea.contact_import_export.data.model.Contact
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -25,7 +27,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ExportContactsScreenViewModel @Inject constructor(
-    application: Application
+    application: Application,
+    private val adManager: AdManager
 ) : ViewModel() {
 
     private val contentResolver: ContentResolver = application.contentResolver
@@ -37,7 +40,11 @@ class ExportContactsScreenViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             val contactList = fetchContacts()
-            _uiState.value = _uiState.value.copy(isLoading = false, allContacts = contactList, selectedContacts = mutableListOf())
+            _uiState.value = _uiState.value.copy(
+                isLoading = false,
+                allContacts = contactList,
+                selectedContacts = mutableListOf()
+            )
         }
     }
 
@@ -88,7 +95,8 @@ class ExportContactsScreenViewModel @Inject constructor(
 
                 emailCur?.apply {
                     while (this.moveToNext()) {
-                        val emailIndex = this.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA)
+                        val emailIndex =
+                            this.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA)
                         email = this.getString(emailIndex)
                     }
                 }
@@ -104,7 +112,8 @@ class ExportContactsScreenViewModel @Inject constructor(
 
                 addressCur?.apply {
                     while (this.moveToNext()) {
-                        val addressIndex = this.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS)
+                        val addressIndex =
+                            this.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS)
                         address = this.getString(addressIndex)
                     }
                 }
@@ -116,11 +125,13 @@ class ExportContactsScreenViewModel @Inject constructor(
 
                 if (existingContact != null) {
                     // If the contact exists, update the fields (only if they are non-empty)
-                    val updatedAddress = if (address.isNotEmpty()) address else existingContact.address
+                    val updatedAddress =
+                        if (address.isNotEmpty()) address else existingContact.address
                     val updatedEmail = if (email.isNotEmpty()) email else existingContact.email
 
                     // Update the contact in the map
-                    contacts[phoneNumber] = existingContact.copy(address = updatedAddress, email = updatedEmail)
+                    contacts[phoneNumber] =
+                        existingContact.copy(address = updatedAddress, email = updatedEmail)
                 } else {
                     // If the contact doesn't exist, add it to the map
                     contacts[phoneNumber] = Contact(id, name, phoneNumber, address, email)
@@ -186,6 +197,20 @@ class ExportContactsScreenViewModel @Inject constructor(
 
     fun searchContacts(searchText: String) {
         _uiState.update { it.copy(searchText = searchText) }
+    }
+
+    fun showAdAndExportContacts(activity: Activity, context: Activity) {
+        adManager.showRewardedAd(
+            activity,
+            onRewarded = {
+                exportContacts(context)
+            },
+            onAdClosed = {
+            },
+            onAdFailedToShow = {
+                exportContacts(context)
+            }
+        )
     }
 
 }

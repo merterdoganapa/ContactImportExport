@@ -1,6 +1,7 @@
 package com.mea.contact_import_export.ui.screens.exportcontacts
 
 import android.Manifest
+import android.app.Activity
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -38,6 +39,7 @@ fun ExportContactsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val activity = context as? Activity
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -95,7 +97,7 @@ fun ExportContactsScreen(
                     viewModel.searchContacts(searchText)
                 },
                 onExportSelectedContactsClick = {
-                    viewModel.exportContacts(context)
+                    activity?.let { viewModel.showAdAndExportContacts(it, context) }
                 },
                 searchText = uiState.searchText
             )
