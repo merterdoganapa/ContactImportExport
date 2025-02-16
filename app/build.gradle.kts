@@ -15,8 +15,8 @@ android {
         applicationId = "com.mea.contact_import_export"
         minSdk = 28
         targetSdk = 35
-        versionCode = 5
-        versionName = "1.4"
+        versionCode = 6
+        versionName = "1.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -31,7 +31,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "REWARDED_AD_UNIT_ID", "\"ca-app-pub-8148037787730261/4857771128\"")
+            buildConfigField("String", "REWARDED_AD_UNIT_ID", "\"ca-app-pub-8148037787730261/1683407907\"")
 
         }
         debug {
