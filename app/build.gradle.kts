@@ -31,7 +31,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "REWARDED_AD_UNIT_ID", "\"ca-app-pub-8148037787730261/5834821199\"")
+            buildConfigField("String", "REWARDED_AD_UNIT_ID", "\"ca-app-pub-8148037787730261/4857771128\"")
 
         }
         debug {
