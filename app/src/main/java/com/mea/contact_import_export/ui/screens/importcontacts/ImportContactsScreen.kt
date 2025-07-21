@@ -22,6 +22,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import com.mea.contact_import_export.data.AdPolicyPreference
+import com.mea.contact_import_export.ui.components.AdPolicyDialog
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -42,6 +50,10 @@ fun ImportContactsScreen(
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     val activity = context as? Activity
+    val coroutineScope = rememberCoroutineScope()
+    var showAdPolicyDialog by remember { mutableStateOf(false) }
+    var pendingVcfUri by remember { mutableStateOf<android.net.Uri?>(null) }
+    var pendingActivity by remember { mutableStateOf<Activity?>(null) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -59,7 +71,16 @@ fun ImportContactsScreen(
         if (result.resultCode == RESULT_OK) {
             val uri = result.data?.data
             if (uri != null && activity != null) {
-                viewModel.showAdAndProcessVcfFile(activity, context, uri)
+                coroutineScope.launch {
+                    val dontShow = AdPolicyPreference.dontShowAgainFlow(context).first()
+                    if (dontShow) {
+                        viewModel.showAdAndProcessVcfFile(activity, context, uri)
+                    } else {
+                        pendingVcfUri = uri
+                        pendingActivity = activity
+                        showAdPolicyDialog = true
+                    }
+                }
             }
         } else {
             Toast.makeText(context, fileSelectionFailed, Toast.LENGTH_SHORT).show()
@@ -76,6 +97,31 @@ fun ImportContactsScreen(
         permissionLauncher.launch(Manifest.permission.WRITE_CONTACTS)
     }
 
+    if (showAdPolicyDialog) {
+        AdPolicyDialog(
+            onConfirm = { dontShowAgain ->
+                coroutineScope.launch {
+                    if (dontShowAgain) {
+                        AdPolicyPreference.setDontShowAgain(context, true)
+                    }
+                    showAdPolicyDialog = false
+                    pendingVcfUri?.let { uri ->
+                        pendingActivity?.let { act ->
+                            viewModel.showAdAndProcessVcfFile(act, pendingActivity!!, uri)
+                        }
+                    }
+                    pendingVcfUri = null
+                    pendingActivity = null
+                }
+            },
+            onCancel = {
+                showAdPolicyDialog = false
+                pendingVcfUri = null
+                pendingActivity = null
+            }
+        )
+    }
+
     when {
         uiState.isLoading -> {
             Box(
@@ -85,11 +131,9 @@ fun ImportContactsScreen(
                 CircularProgressIndicator()
             }
         }
-
         uiState.errorMessage != null -> {
             // Show error message
         }
-
         uiState.allContacts.isEmpty() -> {
             EmptyContactsView(
                 onImportClick = {
@@ -97,7 +141,6 @@ fun ImportContactsScreen(
                 }
             )
         }
-
         else -> {
             ContactsList(
                 contacts = uiState.allContacts,

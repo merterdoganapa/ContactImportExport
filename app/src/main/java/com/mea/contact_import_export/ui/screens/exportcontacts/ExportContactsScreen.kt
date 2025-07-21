@@ -20,6 +20,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import com.mea.contact_import_export.data.AdPolicyPreference
+import com.mea.contact_import_export.ui.components.AdPolicyDialog
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -40,6 +48,10 @@ fun ExportContactsScreen(
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     val activity = context as? Activity
+    val coroutineScope = rememberCoroutineScope()
+    var showAdPolicyDialog by remember { mutableStateOf(false) }
+    var pendingActivity by remember { mutableStateOf<Activity?>(null) }
+    var pendingContext by remember { mutableStateOf<Activity?>(null) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -56,6 +68,31 @@ fun ExportContactsScreen(
         ) == PackageManager.PERMISSION_GRANTED
     }
 
+    if (showAdPolicyDialog) {
+        AdPolicyDialog(
+            onConfirm = { dontShowAgain ->
+                coroutineScope.launch {
+                    if (dontShowAgain) {
+                        AdPolicyPreference.setDontShowAgain(context, true)
+                    }
+                    showAdPolicyDialog = false
+                    pendingActivity?.let { act ->
+                        pendingContext?.let { ctx ->
+                            viewModel.showAdAndExportContacts(act, ctx)
+                        }
+                    }
+                    pendingActivity = null
+                    pendingContext = null
+                }
+            },
+            onCancel = {
+                showAdPolicyDialog = false
+                pendingActivity = null
+                pendingContext = null
+            }
+        )
+    }
+
     when {
         uiState.isLoading -> {
             Box(
@@ -65,11 +102,9 @@ fun ExportContactsScreen(
                 CircularProgressIndicator()
             }
         }
-
         uiState.errorMessage != null -> {
             // Show error message
         }
-
         uiState.allContacts.isEmpty() -> {
             EmptyExportContactsView(
                 onSyncClick = {
@@ -79,7 +114,6 @@ fun ExportContactsScreen(
                 }
             )
         }
-
         else -> {
             ContactsList(
                 contacts = uiState.allContacts,
@@ -97,7 +131,18 @@ fun ExportContactsScreen(
                     viewModel.searchContacts(searchText)
                 },
                 onExportSelectedContactsClick = {
-                    activity?.let { viewModel.showAdAndExportContacts(it, context) }
+                    activity?.let {
+                        coroutineScope.launch {
+                            val dontShow = AdPolicyPreference.dontShowAgainFlow(context).first()
+                            if (dontShow) {
+                                viewModel.showAdAndExportContacts(it, context)
+                            } else {
+                                pendingActivity = it
+                                pendingContext = context
+                                showAdPolicyDialog = true
+                            }
+                        }
+                    }
                 },
                 searchText = uiState.searchText
             )

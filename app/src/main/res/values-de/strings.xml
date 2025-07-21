@@ -20,5 +20,10 @@
     <string name="export_selected_contacts">Ausgewählte Kontakte exportieren:</string>
     <string name="add_contacts_failed">Fehler beim Hinzufügen von Kontakten</string>
     <string name="add_contacts_success">Kontakte erfolgreich hinzugefügt</string>
+    <string name="ad_policy_title">Google-Anzeigenrichtlinie</string>
+    <string name="ad_policy_message">Um fortzufahren, lesen und akzeptieren Sie bitte unsere Google-Anzeigenrichtlinie. Sie können als Teil der App-Funktionalität Anzeigen sehen.</string>
+    <string name="ad_policy_dont_show_again">Nicht mehr anzeigen</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Abbrechen</string>
 
 </resources>

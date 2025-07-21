@@ -20,5 +20,10 @@
     <string name="export_selected_contacts">Seçilen kişileri dışarı aktar:</string>
     <string name="add_contacts_failed">Kişiler eklenirken hata oluştu</string>
     <string name="add_contacts_success">Kişiler başarıyla eklendi</string>
+    <string name="ad_policy_title">Google Reklam Politikası</string>
+    <string name="ad_policy_message">Devam etmek için lütfen Google Reklam politikamızı inceleyip kabul edin. Bu uygulamanın işlevselliğinin bir parçası olarak reklamlar görebilirsiniz.</string>
+    <string name="ad_policy_dont_show_again">Bir daha gösterme</string>
+    <string name="ok">Tamam</string>
+    <string name="cancel">İptal</string>
 
 </resources>

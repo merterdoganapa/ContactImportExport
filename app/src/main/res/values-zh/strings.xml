@@ -20,5 +20,10 @@
     <string name="export_selected_contacts">导出所选联系人：</string>
     <string name="add_contacts_failed">添加联系人时出错</string>
     <string name="add_contacts_success">联系人添加成功</string>
+    <string name="ad_policy_title">Google 广告政策</string>
+    <string name="ad_policy_message">要继续，请阅读并接受我们的 Google 广告政策。您可能会看到作为本应用功能一部分的广告。</string>
+    <string name="ad_policy_dont_show_again">不再显示</string>
+    <string name="ok">确定</string>
+    <string name="cancel">取消</string>
 
 </resources>

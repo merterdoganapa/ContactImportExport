@@ -19,4 +19,9 @@
     <string name="export_selected_contacts">Export selected contacts:</string>
     <string name="add_contacts_failed">Error adding contacts</string>
     <string name="add_contacts_success">Contacts added successfully</string>
+    <string name="ad_policy_title">Google Ads Policy</string>
+    <string name="ad_policy_message">To continue, please review and accept our Google Ads policy. You may see ads as part of this app\'s functionality.</string>
+    <string name="ad_policy_dont_show_again">Don\'t show this again</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
 </resources>

@@ -27,8 +27,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.mea.contact_import_export.R
-import com.mea.contact_import_export.SearchBar
 import com.mea.contact_import_export.data.model.Contact
+import com.mea.contact_import_export.ui.components.SearchBar
 import com.mea.contact_import_export.ui.theme.PrimaryColor
 import com.mea.contact_import_export.ui.theme.Typography
 
