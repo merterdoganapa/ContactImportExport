@@ -20,10 +20,10 @@
     <string name="export_selected_contacts">Экспорт выбранных контактов:</string>
     <string name="add_contacts_failed">Ошибка добавления контактов</string>
     <string name="add_contacts_success">Контакты успешно добавлены</string>
-    <string name="ad_policy_title">Политика рекламы Google</string>
-    <string name="ad_policy_message">Чтобы продолжить, пожалуйста, ознакомьтесь и примите нашу политику рекламы Google. Вы можете видеть рекламу как часть функциональности приложения.</string>
-    <string name="ad_policy_dont_show_again">Больше не показывать</string>
-    <string name="ad_policy_menu_toggle">Не показывать диалог политики рекламы</string>
+    <string name="ad_policy_title">Внимание</string>
+    <string name="ad_policy_message">Чтобы продолжить, вам нужно посмотреть рекламу.</string>
+    <string name="ad_policy_dont_show_again">Больше не показывать это сообщение</string>
+    <string name="ad_policy_menu_toggle">Не показывать рекламный диалог</string>
     <string name="ok">ОК</string>
     <string name="cancel">Отмена</string>
 

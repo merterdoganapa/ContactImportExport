@@ -20,11 +20,11 @@
     <string name="export_selected_contacts">Exportar contatos selecionados:</string>
     <string name="add_contacts_failed">Erro ao adicionar contatos</string>
     <string name="add_contacts_success">Contatos adicionados com sucesso</string>
-    <string name="ad_policy_title">Política de Anúncios do Google</string>
-    <string name="ad_policy_message">Para continuar, revise e aceite nossa política de anúncios do Google. Você pode ver anúncios como parte da funcionalidade deste aplicativo.</string>
-    <string name="ad_policy_dont_show_again">Não mostrar novamente</string>
+    <string name="ad_policy_title">Aviso</string>
+    <string name="ad_policy_message">Para continuar, você precisa assistir a um anúncio.</string>
+    <string name="ad_policy_dont_show_again">Não mostrar esta mensagem novamente</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancelar</string>
-    <string name="ad_policy_menu_toggle">Não mostrar o diálogo de política de anúncios</string>
+    <string name="ad_policy_menu_toggle">Não mostrar o diálogo de anúncio</string>
 
 </resources>
