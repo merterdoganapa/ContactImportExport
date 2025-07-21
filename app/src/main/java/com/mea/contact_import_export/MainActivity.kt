@@ -4,6 +4,7 @@ import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -48,10 +49,11 @@ class MainActivity : ComponentActivity() {
             ContactImportExportTheme {
                 AppContent()
             }
+            val isSystemInDarkTheme = isSystemInDarkTheme()
+            WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = !isSystemInDarkTheme
+            WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightNavigationBars = !isSystemInDarkTheme
         }
-        WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = true
-        WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightNavigationBars =
-            true
+
     }
 
 }

@@ -26,22 +26,23 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import com.mea.contact_import_export.data.AdPolicyPreference
-import com.mea.contact_import_export.ui.components.AdPolicyDialog
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.mea.contact_import_export.R
+import com.mea.contact_import_export.data.AdPolicyPreference
+import com.mea.contact_import_export.ui.components.AdPolicyDialog
 import com.mea.contact_import_export.ui.theme.PrimaryColor
 import com.mea.contact_import_export.ui.view.ContactsList
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 @Composable
 fun ImportContactsScreen(
@@ -131,9 +132,11 @@ fun ImportContactsScreen(
                 CircularProgressIndicator()
             }
         }
+
         uiState.errorMessage != null -> {
             // Show error message
         }
+
         uiState.allContacts.isEmpty() -> {
             EmptyContactsView(
                 onImportClick = {
@@ -141,6 +144,7 @@ fun ImportContactsScreen(
                 }
             )
         }
+
         else -> {
             ContactsList(
                 contacts = uiState.allContacts,
@@ -193,7 +197,10 @@ fun EmptyContactsView(
                 colorFilter = ColorFilter.tint(color = PrimaryColor)
             )
 
-            Text(text = stringResource(id = R.string.no_contacts_to_import))
+            Text(
+                text = stringResource(id = R.string.no_contacts_to_import),
+                textAlign = TextAlign.Center
+            )
 
             TextButton(onClick = onImportClick) {
                 Text(text = stringResource(id = R.string.import_title))

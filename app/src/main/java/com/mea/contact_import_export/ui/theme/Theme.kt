@@ -34,8 +34,7 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun ContactImportExportTheme(
-    darkTheme: Boolean = false,
-    // Dynamic color is available on Android 12+
+    darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
