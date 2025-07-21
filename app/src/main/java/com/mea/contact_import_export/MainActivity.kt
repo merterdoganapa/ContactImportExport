@@ -17,12 +17,18 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.mea.contact_import_export.data.AdPolicyPreference
 import com.mea.contact_import_export.ui.components.TopAppBarMenu
 import com.mea.contact_import_export.ui.screens.exportcontacts.ExportContactsScreen
 import com.mea.contact_import_export.ui.screens.exportcontacts.ExportContactsScreenViewModel
@@ -30,6 +36,7 @@ import com.mea.contact_import_export.ui.screens.importcontacts.ImportContactsScr
 import com.mea.contact_import_export.ui.screens.importcontacts.ImportContactsScreenViewModel
 import com.mea.contact_import_export.ui.theme.ContactImportExportTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -58,6 +65,12 @@ fun AppContent(
     val pagerState = rememberPagerState(0, 0F, { 2 })
     val context = LocalContext.current
     val activity = context as? Activity
+    val coroutineScope = rememberCoroutineScope()
+    var dontShowAdPolicyDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(context) {
+        dontShowAdPolicyDialog = AdPolicyPreference.dontShowAgainFlow(context).first()
+    }
 
     Scaffold(
         topBar = {
@@ -83,7 +96,15 @@ fun AppContent(
                         },
                         isSyncEnabled = pagerState.currentPage == 1,
                         isExportEnabled = pagerState.currentPage == 1,
-                        isImportEnabled = pagerState.currentPage == 0
+                        isImportEnabled = pagerState.currentPage == 0,
+                        dontShowAdPolicyDialog = dontShowAdPolicyDialog,
+                        onToggleAdPolicyDialog = {
+                            coroutineScope.launch {
+                                val newValue = !dontShowAdPolicyDialog
+                                AdPolicyPreference.setDontShowAgain(context, newValue)
+                                dontShowAdPolicyDialog = newValue
+                            }
+                        }
                     )
                 }
             )
@@ -94,7 +115,6 @@ fun AppContent(
             stringResource(id = R.string.import_title),
             stringResource(id = R.string.export_title)
         )
-        val coroutineScope = rememberCoroutineScope()
         Column(
             modifier = Modifier
                 .fillMaxWidth()

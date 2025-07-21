@@ -25,5 +25,6 @@
     <string name="ad_policy_dont_show_again">عدم العرض مرة أخرى</string>
     <string name="ok">موافق</string>
     <string name="cancel">إلغاء</string>
+    <string name="ad_policy_menu_toggle">عدم عرض مربع حوار سياسة الإعلانات</string>
 
 </resources>

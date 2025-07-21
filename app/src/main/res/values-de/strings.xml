@@ -25,5 +25,6 @@
     <string name="ad_policy_dont_show_again">Nicht mehr anzeigen</string>
     <string name="ok">OK</string>
     <string name="cancel">Abbrechen</string>
+    <string name="ad_policy_menu_toggle">Dialog zur Anzeigenrichtlinie nicht anzeigen</string>
 
 </resources>

@@ -25,5 +25,6 @@
     <string name="ad_policy_dont_show_again">Bir daha gösterme</string>
     <string name="ok">Tamam</string>
     <string name="cancel">İptal</string>
+    <string name="ad_policy_menu_toggle">Reklam politikası diyalogunu gösterme</string>
 
 </resources>

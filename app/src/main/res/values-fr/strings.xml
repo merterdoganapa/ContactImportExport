@@ -25,5 +25,6 @@
     <string name="ad_policy_dont_show_again">Ne plus afficher</string>
     <string name="ok">OK</string>
     <string name="cancel">Annuler</string>
+    <string name="ad_policy_menu_toggle">Ne pas afficher la boîte de dialogue de politique publicitaire</string>
 
 </resources>
