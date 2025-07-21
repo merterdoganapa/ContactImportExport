@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -202,8 +204,16 @@ fun EmptyContactsView(
                 textAlign = TextAlign.Center
             )
 
-            TextButton(onClick = onImportClick) {
-                Text(text = stringResource(id = R.string.import_title))
+            TextButton(
+                onClick = onImportClick,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Text(
+                    text = stringResource(id = R.string.import_title),
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
             }
         }
     }
