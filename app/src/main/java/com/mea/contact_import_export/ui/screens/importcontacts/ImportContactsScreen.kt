@@ -15,25 +15,36 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.mea.contact_import_export.R
+import com.mea.contact_import_export.data.AdPolicyPreference
+import com.mea.contact_import_export.ui.components.AdPolicyDialog
 import com.mea.contact_import_export.ui.theme.PrimaryColor
 import com.mea.contact_import_export.ui.view.ContactsList
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 @Composable
 fun ImportContactsScreen(
@@ -42,6 +53,10 @@ fun ImportContactsScreen(
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     val activity = context as? Activity
+    val coroutineScope = rememberCoroutineScope()
+    var showAdPolicyDialog by remember { mutableStateOf(false) }
+    var pendingVcfUri by remember { mutableStateOf<android.net.Uri?>(null) }
+    var pendingActivity by remember { mutableStateOf<Activity?>(null) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -59,7 +74,16 @@ fun ImportContactsScreen(
         if (result.resultCode == RESULT_OK) {
             val uri = result.data?.data
             if (uri != null && activity != null) {
-                viewModel.showAdAndProcessVcfFile(activity, context, uri)
+                coroutineScope.launch {
+                    val dontShow = AdPolicyPreference.dontShowAgainFlow(context).first()
+                    if (dontShow) {
+                        viewModel.showAdAndProcessVcfFile(activity, context, uri)
+                    } else {
+                        pendingVcfUri = uri
+                        pendingActivity = activity
+                        showAdPolicyDialog = true
+                    }
+                }
             }
         } else {
             Toast.makeText(context, fileSelectionFailed, Toast.LENGTH_SHORT).show()
@@ -74,6 +98,31 @@ fun ImportContactsScreen(
         viewModel.setLauncher(launcher)
 
         permissionLauncher.launch(Manifest.permission.WRITE_CONTACTS)
+    }
+
+    if (showAdPolicyDialog) {
+        AdPolicyDialog(
+            onConfirm = { dontShowAgain ->
+                coroutineScope.launch {
+                    if (dontShowAgain) {
+                        AdPolicyPreference.setDontShowAgain(context, true)
+                    }
+                    showAdPolicyDialog = false
+                    pendingVcfUri?.let { uri ->
+                        pendingActivity?.let { act ->
+                            viewModel.showAdAndProcessVcfFile(act, pendingActivity!!, uri)
+                        }
+                    }
+                    pendingVcfUri = null
+                    pendingActivity = null
+                }
+            },
+            onCancel = {
+                showAdPolicyDialog = false
+                pendingVcfUri = null
+                pendingActivity = null
+            }
+        )
     }
 
     when {
@@ -150,10 +199,21 @@ fun EmptyContactsView(
                 colorFilter = ColorFilter.tint(color = PrimaryColor)
             )
 
-            Text(text = stringResource(id = R.string.no_contacts_to_import))
+            Text(
+                text = stringResource(id = R.string.no_contacts_to_import),
+                textAlign = TextAlign.Center
+            )
 
-            TextButton(onClick = onImportClick) {
-                Text(text = stringResource(id = R.string.import_title))
+            TextButton(
+                onClick = onImportClick,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Text(
+                    text = stringResource(id = R.string.import_title),
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
             }
         }
     }

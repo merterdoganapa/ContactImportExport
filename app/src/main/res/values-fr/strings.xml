@@ -20,5 +20,11 @@
     <string name="export_selected_contacts">Exporter les contacts sélectionnés :</string>
     <string name="add_contacts_failed">Erreur lors de l\'ajout des contacts</string>
     <string name="add_contacts_success">Contacts ajoutés avec succès</string>
+    <string name="ad_policy_title">Information</string>
+    <string name="ad_policy_message">Pour continuer, vous devez regarder une publicité.</string>
+    <string name="ad_policy_dont_show_again">Ne plus afficher ce message</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Annuler</string>
+    <string name="ad_policy_menu_toggle">Ne pas afficher la boîte de dialogue de publicité</string>
 
 </resources>
