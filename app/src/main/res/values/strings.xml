@@ -59,6 +59,10 @@
     <string name="premium_access">Premium access</string>
     <string name="recent_imports">Recent Imports</string>
     <string name="view_all">View All</string>
+    <string name="recent_imports_empty">No recent imports yet.</string>
+    <string name="recent_time_today">Today, %1$s</string>
+    <string name="recent_time_yesterday">Yesterday, %1$s</string>
+    <string name="recent_import_contacts_count">%1$s • %2$d contacts</string>
     <string name="google_sync">Google Sync</string>
     <string name="recent_google_sync">Today, 10:45 AM • 152 contacts</string>
     <string name="recent_phone_import">Today • Imported from phone contacts</string>
@@ -77,8 +81,13 @@
     <string name="all_time">All time</string>
     <string name="contact_group">Contact Group</string>
     <string name="all_contacts_count">All Contacts (1,248)</string>
+    <string name="all_contacts_count_dynamic">All Contacts (%1$d)</string>
+    <string name="selected_contacts_count_dynamic">Selected (%1$d)</string>
     <string name="has_phone_number">Has Phone Number</string>
     <string name="only_contacts_with_digits">Only export contacts with digits</string>
+    <string name="export_contacts_button">Export Contacts</string>
+    <string name="export_format_not_supported">Only VCF export is available in this phase.</string>
+    <string name="no_contacts_to_export_now">No contacts available for export.</string>
     <string name="phone_import_loading">Importing contacts from phone...</string>
     <string name="phone_import_completed">Phone contacts loaded successfully.</string>
     <string name="phone_import_permission_required">Contacts permission is required to import from phone.</string>

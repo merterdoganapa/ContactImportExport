@@ -60,6 +60,10 @@
     <string name="premium_access">Premium erişim</string>
     <string name="recent_imports">Son İçe Aktarmalar</string>
     <string name="view_all">Tümünü Gör</string>
+    <string name="recent_imports_empty">Henüz içe aktarma geçmişi yok.</string>
+    <string name="recent_time_today">Bugün, %1$s</string>
+    <string name="recent_time_yesterday">Dün, %1$s</string>
+    <string name="recent_import_contacts_count">%1$s • %2$d kişi</string>
     <string name="google_sync">Google Senk.</string>
     <string name="recent_google_sync">Bugün, 10:45 • 152 kişi</string>
     <string name="recent_phone_import">Bugün • Telefon kişilerinden içe aktarıldı</string>
@@ -78,8 +82,13 @@
     <string name="all_time">Tüm zamanlar</string>
     <string name="contact_group">Kişi Grubu</string>
     <string name="all_contacts_count">Tüm Kişiler (1,248)</string>
+    <string name="all_contacts_count_dynamic">Tüm Kişiler (%1$d)</string>
+    <string name="selected_contacts_count_dynamic">Seçili (%1$d)</string>
     <string name="has_phone_number">Telefon Numarası Olanlar</string>
     <string name="only_contacts_with_digits">Sadece numara içeren kişileri dışa aktar</string>
+    <string name="export_contacts_button">Kişileri Dışa Aktar</string>
+    <string name="export_format_not_supported">Bu fazda yalnızca VCF dışa aktarma kullanılabilir.</string>
+    <string name="no_contacts_to_export_now">Dışa aktarılacak kişi bulunmuyor.</string>
     <string name="phone_import_loading">Telefon kişilerinden içe aktarılıyor...</string>
     <string name="phone_import_completed">Telefon kişileri başarıyla yüklendi.</string>
     <string name="phone_import_permission_required">Telefondan içe aktarma için kişiler izni gerekiyor.</string>

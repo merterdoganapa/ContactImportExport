@@ -32,6 +32,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.mea.contact_import_export.R
+import com.mea.contact_import_export.data.ImportHistoryPreference
 import com.mea.contact_import_export.ui.screens.exportcontacts.ExportContactsScreenViewModel
 import com.mea.contact_import_export.ui.screens.home.components.ContactsScreen
 import com.mea.contact_import_export.ui.screens.home.components.HomeBottomNavigationBar
@@ -48,6 +49,7 @@ fun AppContent(
     val context = LocalContext.current
     val activity = context as? Activity
     val exportUiState by exportContactsViewModel.uiState.collectAsState()
+    val recentImports by ImportHistoryPreference.recentImportsFlow(context).collectAsState(initial = emptyList())
     val navController = rememberNavController()
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
@@ -58,6 +60,7 @@ fun AppContent(
     var isPhoneImporting by rememberSaveable { mutableStateOf(false) }
     var phoneImportRequested by rememberSaveable { mutableStateOf(false) }
     var navigateToContactsAfterImport by rememberSaveable { mutableStateOf(false) }
+    var defaultExportContactGroup by rememberSaveable { mutableStateOf(ExportContactGroup.All) }
     var previousLoadingState by remember { mutableStateOf(false) }
 
     val readContactsPermissionLauncher = rememberLauncherForActivityResult(
@@ -78,7 +81,19 @@ fun AppContent(
         if (result.resultCode == RESULT_OK) {
             val uri = result.data?.data
             if (uri != null && activity != null) {
-                importContactsViewModel.showAdAndProcessVcfFile(activity, activity, uri)
+                importContactsViewModel.showAdAndProcessVcfFile(
+                    activity = activity,
+                    context = activity,
+                    uri = uri
+                ) { importedCount ->
+                    coroutineScope.launch {
+                        ImportHistoryPreference.addRecentImport(
+                            context = context,
+                            source = ImportHistoryPreference.SOURCE_VCF,
+                            contactCount = importedCount
+                        )
+                    }
+                }
                 Toast.makeText(context, context.getString(R.string.import_started), Toast.LENGTH_SHORT).show()
             }
         }
@@ -125,6 +140,11 @@ fun AppContent(
                 navigateToContactsAfterImport = false
             }
             coroutineScope.launch {
+                ImportHistoryPreference.addRecentImport(
+                    context = context,
+                    source = ImportHistoryPreference.SOURCE_PHONE,
+                    contactCount = exportUiState.allContacts.size
+                )
                 snackbarHostState.showSnackbar(message)
             }
         }
@@ -139,6 +159,9 @@ fun AppContent(
                 HomeBottomNavigationBar(
                     selectedMainTab = selectedMainTab,
                     onTabSelected = { tab ->
+                        if (tab == MainTab.Export) {
+                            defaultExportContactGroup = ExportContactGroup.All
+                        }
                         if (currentRoute != tab.route) {
                             navController.navigate(tab.route) {
                                 launchSingleTop = true
@@ -170,8 +193,16 @@ fun AppContent(
                         exportContactsViewModel.updateSelectedContacts(contacts.toMutableList())
                     },
                     onExportSelected = {
-                        if (activity == null) return@ContactsScreen
-                        exportContactsViewModel.showAdAndExportContacts(activity, activity)
+                        defaultExportContactGroup = if (exportUiState.selectedContacts.isNotEmpty()) {
+                            ExportContactGroup.Selected
+                        } else {
+                            ExportContactGroup.All
+                        }
+                        if (currentRoute != MainTab.Export.route) {
+                            navController.navigate(MainTab.Export.route) {
+                                launchSingleTop = true
+                            }
+                        }
                     },
                     onDeleteSelected = {
                         val removedCount = exportContactsViewModel.removeSelectedContactsFromList()
@@ -218,16 +249,11 @@ fun AppContent(
                     },
                     isImportingPhone = isPhoneImporting,
                     onImportVcf = { importContactsViewModel.selectVcfFile() },
-                    onExportToVcf = {
-                        if (activity == null) return@ImportExportScreen
-                        val selected = if (exportUiState.selectedContacts.isEmpty()) {
-                            exportUiState.allContacts.toMutableList()
-                        } else {
-                            exportUiState.selectedContacts.toMutableList()
-                        }
-                        exportContactsViewModel.updateSelectedContacts(selected)
-                        exportContactsViewModel.showAdAndExportContacts(activity, activity)
-                    }
+                    defaultExportContactGroup = defaultExportContactGroup,
+                    allContactsCount = exportUiState.allContacts.size,
+                    selectedContactsCount = exportUiState.selectedContacts.size,
+                    onExportRequest = { _, _ -> },
+                    recentImports = recentImports
                 )
             }
             composable(MainTab.Export.route) {
@@ -255,12 +281,27 @@ fun AppContent(
                     },
                     isImportingPhone = isPhoneImporting,
                     onImportVcf = { importContactsViewModel.selectVcfFile() },
-                    onExportToVcf = {
+                    defaultExportContactGroup = defaultExportContactGroup,
+                    allContactsCount = exportUiState.allContacts.size,
+                    selectedContactsCount = exportUiState.selectedContacts.size,
+                    recentImports = recentImports,
+                    onExportRequest = { group, format ->
+                        if (format != "vcf") {
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar(context.getString(R.string.export_format_not_supported))
+                            }
+                            return@ImportExportScreen
+                        }
                         if (activity == null) return@ImportExportScreen
-                        val selected = if (exportUiState.selectedContacts.isEmpty()) {
-                            exportUiState.allContacts.toMutableList()
-                        } else {
-                            exportUiState.selectedContacts.toMutableList()
+                        val selected = when (group) {
+                            ExportContactGroup.All -> exportUiState.allContacts.toMutableList()
+                            ExportContactGroup.Selected -> exportUiState.selectedContacts.toMutableList()
+                        }
+                        if (selected.isEmpty()) {
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar(context.getString(R.string.no_contacts_to_export_now))
+                            }
+                            return@ImportExportScreen
                         }
                         exportContactsViewModel.updateSelectedContacts(selected)
                         exportContactsViewModel.showAdAndExportContacts(activity, activity)

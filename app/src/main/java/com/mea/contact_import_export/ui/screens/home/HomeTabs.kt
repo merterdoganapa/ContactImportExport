@@ -23,3 +23,7 @@ enum class MainTab(
 enum class ImportExportTab {
     Import, Export
 }
+
+enum class ExportContactGroup {
+    All, Selected
+}

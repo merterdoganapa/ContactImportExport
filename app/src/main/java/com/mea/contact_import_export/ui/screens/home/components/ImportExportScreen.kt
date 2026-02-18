@@ -21,6 +21,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -32,6 +34,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -44,8 +47,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.mea.contact_import_export.R
+import com.mea.contact_import_export.data.ImportHistoryPreference
+import com.mea.contact_import_export.ui.screens.home.ExportContactGroup
 import com.mea.contact_import_export.ui.screens.home.ImportExportTab
 import com.mea.contact_import_export.ui.theme.PrimaryColor
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @Composable
 fun ImportExportScreen(
@@ -57,10 +66,23 @@ fun ImportExportScreen(
     onImportPhone: () -> Unit,
     isImportingPhone: Boolean = false,
     onImportVcf: () -> Unit,
-    onExportToVcf: () -> Unit
+    defaultExportContactGroup: ExportContactGroup = ExportContactGroup.All,
+    allContactsCount: Int = 0,
+    selectedContactsCount: Int = 0,
+    onExportRequest: (group: ExportContactGroup, format: String) -> Unit = { _, _ -> },
+    recentImports: List<ImportHistoryPreference.ImportHistoryEntry> = emptyList()
 ) {
     var selectedFormat by rememberSaveable { mutableStateOf("vcf") }
     var hasPhoneNumberOnly by rememberSaveable { mutableStateOf(true) }
+    var selectedContactGroup by rememberSaveable(selectedTab, defaultExportContactGroup) {
+        mutableStateOf(defaultExportContactGroup)
+    }
+
+    LaunchedEffect(selectedContactsCount) {
+        if (selectedContactsCount == 0 && selectedContactGroup == ExportContactGroup.Selected) {
+            selectedContactGroup = ExportContactGroup.All
+        }
+    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -176,17 +198,30 @@ fun ImportExportScreen(
                         )
                     }
                 }
-                item {
-                    RecentImportRow(
-                        title = stringResource(id = R.string.phone_contacts),
-                        subtitle = stringResource(id = R.string.recent_phone_import)
-                    )
-                }
-                item {
-                    RecentImportRow(
-                        title = stringResource(id = R.string.vcf_file),
-                        subtitle = stringResource(id = R.string.recent_vcf_import)
-                    )
+                if (recentImports.isEmpty()) {
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White)
+                        ) {
+                            Text(
+                                text = stringResource(id = R.string.recent_imports_empty),
+                                modifier = Modifier.padding(12.dp),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color(0xFF7A8593)
+                            )
+                        }
+                    }
+                } else {
+                    recentImports.take(10).forEach { entry ->
+                        item {
+                            RecentImportRow(
+                                title = sourceLabel(entry.source),
+                                subtitle = entrySubtitle(entry)
+                            )
+                        }
+                    }
                 }
             } else {
                 item { SectionTitle(text = stringResource(id = R.string.export_format_title)) }
@@ -196,10 +231,7 @@ fun ImportExportScreen(
                         subtitle = stringResource(id = R.string.standard_contact_format),
                         isSelected = selectedFormat == "vcf",
                         badge = null,
-                        onClick = {
-                            selectedFormat = "vcf"
-                            onExportToVcf()
-                        }
+                        onClick = { selectedFormat = "vcf" }
                     )
                 }
                 item {
@@ -209,15 +241,6 @@ fun ImportExportScreen(
                         isSelected = selectedFormat == "csv",
                         badge = "PRO",
                         onClick = { selectedFormat = "csv" }
-                    )
-                }
-                item {
-                    ExportFormatRow(
-                        title = stringResource(id = R.string.cloud_sync),
-                        subtitle = stringResource(id = R.string.sync_with_cloud),
-                        isSelected = selectedFormat == "cloud",
-                        badge = "PRO",
-                        onClick = { selectedFormat = "cloud" }
                     )
                 }
                 item { SectionTitle(text = stringResource(id = R.string.advanced_filters)) }
@@ -231,10 +254,32 @@ fun ImportExportScreen(
                             title = stringResource(id = R.string.date_created),
                             value = stringResource(id = R.string.all_time)
                         )
-                        FilterRow(
-                            title = stringResource(id = R.string.contact_group),
-                            value = stringResource(id = R.string.all_contacts_count)
-                        )
+                        Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
+                            Text(
+                                text = stringResource(id = R.string.contact_group),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            ContactGroupOptionRow(
+                                title = stringResource(
+                                    id = R.string.all_contacts_count_dynamic,
+                                    allContactsCount
+                                ),
+                                selected = selectedContactGroup == ExportContactGroup.All,
+                                onClick = { selectedContactGroup = ExportContactGroup.All }
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            ContactGroupOptionRow(
+                                title = stringResource(
+                                    id = R.string.selected_contacts_count_dynamic,
+                                    selectedContactsCount
+                                ),
+                                selected = selectedContactGroup == ExportContactGroup.Selected,
+                                enabled = selectedContactsCount > 0,
+                                onClick = { selectedContactGroup = ExportContactGroup.Selected }
+                            )
+                        }
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -258,6 +303,26 @@ fun ImportExportScreen(
                                 onCheckedChange = { hasPhoneNumberOnly = it }
                             )
                         }
+                    }
+                }
+                item {
+                    val canExport = selectedFormat == "vcf" && when (selectedContactGroup) {
+                        ExportContactGroup.All -> allContactsCount > 0
+                        ExportContactGroup.Selected -> selectedContactsCount > 0
+                    }
+                    Button(
+                        onClick = { onExportRequest(selectedContactGroup, selectedFormat) },
+                        enabled = canExport,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = PrimaryColor,
+                            contentColor = Color.White
+                        )
+                    ) {
+                        Text(text = stringResource(id = R.string.export_contacts_button))
                     }
                 }
             }
@@ -552,5 +617,62 @@ private fun FilterRow(
                 color = Color(0xFF97A3B6)
             )
         }
+    }
+}
+
+@Composable
+private fun sourceLabel(source: String): String {
+    return when (source) {
+        ImportHistoryPreference.SOURCE_PHONE -> stringResource(id = R.string.phone_contacts)
+        ImportHistoryPreference.SOURCE_VCF -> stringResource(id = R.string.vcf_file)
+        else -> source
+    }
+}
+
+@Composable
+private fun entrySubtitle(
+    entry: ImportHistoryPreference.ImportHistoryEntry
+): String {
+    val zone = ZoneId.systemDefault()
+    val dateTime = Instant.ofEpochMilli(entry.timestampMillis).atZone(zone)
+    val now = Instant.now().atZone(zone)
+    val timeText = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault()).format(dateTime)
+    val dayText = when {
+        dateTime.toLocalDate() == now.toLocalDate() ->
+            stringResource(id = R.string.recent_time_today, timeText)
+        dateTime.toLocalDate() == now.toLocalDate().minusDays(1) ->
+            stringResource(id = R.string.recent_time_yesterday, timeText)
+        else -> DateTimeFormatter.ofPattern("dd MMM, HH:mm", Locale.getDefault()).format(dateTime)
+    }
+    return stringResource(id = R.string.recent_import_contacts_count, dayText, entry.contactCount)
+}
+
+@Composable
+private fun ContactGroupOptionRow(
+    title: String,
+    selected: Boolean,
+    enabled: Boolean = true,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .background(if (selected) Color(0xFFEAF3FF) else Color(0xFFF5F8FC))
+            .clickable(enabled = enabled, onClick = onClick)
+            .padding(horizontal = 10.dp, vertical = 11.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodySmall,
+            color = if (enabled) Color(0xFF556172) else Color(0xFF97A3B6)
+        )
+        RadioButton(
+            selected = selected,
+            onClick = onClick,
+            enabled = enabled
+        )
     }
 }
