@@ -41,6 +41,7 @@
     <string name="cleanup_label">Clean Up</string>
     <string name="show_all_label">Show All</string>
     <string name="no_duplicates_found">No duplicate contacts found.</string>
+    <string name="no_search_results">No contacts match your search/filter.</string>
     <string name="no_info_available">No information available</string>
     <string name="import_started">Import file selected</string>
     <string name="back_label">Back</string>

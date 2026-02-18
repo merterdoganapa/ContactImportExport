@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -38,6 +39,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -78,6 +80,9 @@ fun ContactsScreen(
     var showOnlyDuplicates by rememberSaveable { mutableStateOf(false) }
 
     val sourceContacts = if (showOnlyDuplicates) duplicateContacts else contacts
+    val allSourceSelected = sourceContacts.isNotEmpty() && sourceContacts.all { contact ->
+        selectedContacts.contains(contact)
+    }
     val filteredContacts = remember(sourceContacts, searchText) {
         sourceContacts.filter { contact ->
             contact.name.contains(searchText, ignoreCase = true) ||
@@ -147,6 +152,28 @@ fun ContactsScreen(
                 )
             }
 
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    if (allSourceSelected) {
+                        TextButton(
+                            onClick = { onSelectContacts(emptyList()) }
+                        ) {
+                            Text(text = stringResource(id = R.string.deselect_all))
+                        }
+                    } else {
+                        TextButton(
+                            onClick = { onSelectContacts(sourceContacts) },
+                            enabled = sourceContacts.isNotEmpty()
+                        ) {
+                            Text(text = stringResource(id = R.string.select_all))
+                        }
+                    }
+                }
+            }
+
             if (duplicateCount > 0) {
                 item {
                     DuplicatesCard(
@@ -168,7 +195,9 @@ fun ContactsScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            text = if (showOnlyDuplicates) {
+                            text = if (searchText.isNotBlank()) {
+                                stringResource(id = R.string.no_search_results)
+                            } else if (showOnlyDuplicates) {
                                 stringResource(id = R.string.no_duplicates_found)
                             } else {
                                 stringResource(id = R.string.no_contacts_to_export)
@@ -392,7 +421,9 @@ private fun ContactListRow(
         border = if (selected) BorderStroke(1.dp, borderColor) else null
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
+            modifier = Modifier
+                .heightIn(min = 74.dp)
+                .padding(horizontal = 12.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(

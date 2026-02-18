@@ -42,6 +42,7 @@
     <string name="cleanup_label">Temizle</string>
     <string name="show_all_label">Tümünü Göster</string>
     <string name="no_duplicates_found">Çift kişi kaydı bulunamadı.</string>
+    <string name="no_search_results">Arama/filtre ile eşleşen kişi bulunamadı.</string>
     <string name="no_info_available">Bilgi yok</string>
     <string name="import_started">İçe aktarma dosyası seçildi</string>
     <string name="back_label">Geri</string>
