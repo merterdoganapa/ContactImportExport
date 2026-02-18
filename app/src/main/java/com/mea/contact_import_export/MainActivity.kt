@@ -39,6 +39,7 @@ import com.mea.contact_import_export.ui.theme.ContactImportExportTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.collectAsState
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -68,11 +69,8 @@ fun AppContent(
     val context = LocalContext.current
     val activity = context as? Activity
     val coroutineScope = rememberCoroutineScope()
-    var dontShowAdPolicyDialog by remember { mutableStateOf(false) }
-
-    LaunchedEffect(context) {
-        dontShowAdPolicyDialog = AdPolicyPreference.dontShowAgainFlow(context).first()
-    }
+    // Use Preference as single source of truth
+    val dontShowAdPolicyDialog by AdPolicyPreference.dontShowAgainFlow(context).collectAsState(initial = false)
 
     Scaffold(
         topBar = {
@@ -102,9 +100,7 @@ fun AppContent(
                         dontShowAdPolicyDialog = dontShowAdPolicyDialog,
                         onToggleAdPolicyDialog = {
                             coroutineScope.launch {
-                                val newValue = !dontShowAdPolicyDialog
-                                AdPolicyPreference.setDontShowAgain(context, newValue)
-                                dontShowAdPolicyDialog = newValue
+                                AdPolicyPreference.setDontShowAgain(context, !dontShowAdPolicyDialog)
                             }
                         }
                     )

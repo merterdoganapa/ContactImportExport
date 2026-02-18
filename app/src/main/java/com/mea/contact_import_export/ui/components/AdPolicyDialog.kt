@@ -27,7 +27,7 @@ fun AdPolicyDialog(
     onCancel: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var dontShowAgain by remember { mutableStateOf(false) }
+    var dontShowAgain by remember { mutableStateOf(true) }
 
     AlertDialog(
         onDismissRequest = onCancel,

@@ -58,6 +58,9 @@ fun ImportContactsScreen(
     var pendingVcfUri by remember { mutableStateOf<android.net.Uri?>(null) }
     var pendingActivity by remember { mutableStateOf<Activity?>(null) }
 
+    // Use Preference as single source of truth
+    val dontShowAdPolicyDialog by AdPolicyPreference.dontShowAgainFlow(context).collectAsState(initial = false)
+
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -74,15 +77,12 @@ fun ImportContactsScreen(
         if (result.resultCode == RESULT_OK) {
             val uri = result.data?.data
             if (uri != null && activity != null) {
-                coroutineScope.launch {
-                    val dontShow = AdPolicyPreference.dontShowAgainFlow(context).first()
-                    if (dontShow) {
-                        viewModel.showAdAndProcessVcfFile(activity, context, uri)
-                    } else {
-                        pendingVcfUri = uri
-                        pendingActivity = activity
-                        showAdPolicyDialog = true
-                    }
+                if (dontShowAdPolicyDialog) {
+                    viewModel.showAdAndProcessVcfFile(activity, context, uri)
+                } else {
+                    pendingVcfUri = uri
+                    pendingActivity = activity
+                    showAdPolicyDialog = true
                 }
             }
         } else {

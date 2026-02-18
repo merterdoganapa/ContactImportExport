@@ -56,6 +56,9 @@ fun ExportContactsScreen(
     var pendingActivity by remember { mutableStateOf<Activity?>(null) }
     var pendingContext by remember { mutableStateOf<Activity?>(null) }
 
+    // Use Preference as single source of truth
+    val dontShowAdPolicyDialog by AdPolicyPreference.dontShowAgainFlow(context).collectAsState(initial = false)
+
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -105,11 +108,9 @@ fun ExportContactsScreen(
                 CircularProgressIndicator()
             }
         }
-
         uiState.errorMessage != null -> {
             // Show error message
         }
-
         uiState.allContacts.isEmpty() -> {
             EmptyExportContactsView(
                 onSyncClick = {
@@ -119,7 +120,6 @@ fun ExportContactsScreen(
                 }
             )
         }
-
         else -> {
             ContactsList(
                 contacts = uiState.allContacts,
@@ -138,15 +138,12 @@ fun ExportContactsScreen(
                 },
                 onExportSelectedContactsClick = {
                     activity?.let {
-                        coroutineScope.launch {
-                            val dontShow = AdPolicyPreference.dontShowAgainFlow(context).first()
-                            if (dontShow) {
-                                viewModel.showAdAndExportContacts(it, context)
-                            } else {
-                                pendingActivity = it
-                                pendingContext = context
-                                showAdPolicyDialog = true
-                            }
+                        if (dontShowAdPolicyDialog) {
+                            viewModel.showAdAndExportContacts(it, context)
+                        } else {
+                            pendingActivity = it
+                            pendingContext = context
+                            showAdPolicyDialog = true
                         }
                     }
                 },
