@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -98,6 +99,8 @@ fun ContactsScreen(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
+        val selectedCountLabel = if (selectedContacts.size > 999) "999+" else selectedContacts.size.toString()
+
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 112.dp),
@@ -250,15 +253,17 @@ fun ContactsScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
                             modifier = Modifier
-                                .size(18.dp)
-                                .clip(CircleShape)
+                                .defaultMinSize(minWidth = 18.dp, minHeight = 18.dp)
+                                .clip(RoundedCornerShape(999.dp))
                                 .background(PrimaryColor),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = selectedContacts.size.toString(),
+                                text = selectedCountLabel,
                                 style = MaterialTheme.typography.labelSmall,
-                                color = Color.White
+                                color = Color.White,
+                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp),
+                                maxLines = 1
                             )
                         }
                         Spacer(modifier = Modifier.width(8.dp))
