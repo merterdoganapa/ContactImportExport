@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -53,6 +54,8 @@ fun ImportExportScreen(
     onSelectTab: (ImportExportTab) -> Unit,
     showBackButton: Boolean = false,
     onBack: () -> Unit = {},
+    onImportPhone: () -> Unit,
+    isImportingPhone: Boolean = false,
     onImportVcf: () -> Unit,
     onExportToVcf: () -> Unit
 ) {
@@ -114,40 +117,48 @@ fun ImportExportScreen(
             }
 
             if (selectedTab == ImportExportTab.Import) {
+                if (isImportingPhone) {
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(18.dp),
+                                    strokeWidth = 2.dp
+                                )
+                                Text(
+                                    text = stringResource(id = R.string.phone_import_loading),
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                        }
+                    }
+                }
                 item { SectionTitle(text = stringResource(id = R.string.import_sources_title)) }
                 item {
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         SourceCard(
                             modifier = Modifier.weight(1f),
-                            title = stringResource(id = R.string.sim_card),
+                            title = stringResource(id = R.string.phone_contacts),
                             subtitle = stringResource(id = R.string.local_storage),
                             badge = null,
-                            onClick = {}
+                            onClick = onImportPhone,
+                            enabled = !isImportingPhone
                         )
-                        SourceCard(
-                            modifier = Modifier.weight(1f),
-                            title = "Google",
-                            subtitle = stringResource(id = R.string.sync_contacts),
-                            badge = null,
-                            onClick = {}
-                        )
-                    }
-                }
-                item {
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         SourceCard(
                             modifier = Modifier.weight(1f),
                             title = stringResource(id = R.string.vcf_file),
                             subtitle = stringResource(id = R.string.import_vcf),
                             badge = null,
-                            onClick = onImportVcf
-                        )
-                        SourceCard(
-                            modifier = Modifier.weight(1f),
-                            title = stringResource(id = R.string.cloud_backup),
-                            subtitle = stringResource(id = R.string.premium_access),
-                            badge = "PRO",
-                            onClick = {}
+                            onClick = onImportVcf,
+                            enabled = !isImportingPhone
                         )
                     }
                 }
@@ -167,14 +178,14 @@ fun ImportExportScreen(
                 }
                 item {
                     RecentImportRow(
-                        title = stringResource(id = R.string.google_sync),
-                        subtitle = stringResource(id = R.string.recent_google_sync)
+                        title = stringResource(id = R.string.phone_contacts),
+                        subtitle = stringResource(id = R.string.recent_phone_import)
                     )
                 }
                 item {
                     RecentImportRow(
-                        title = stringResource(id = R.string.sim_slot),
-                        subtitle = stringResource(id = R.string.recent_sim_sync)
+                        title = stringResource(id = R.string.vcf_file),
+                        subtitle = stringResource(id = R.string.recent_vcf_import)
                     )
                 }
             } else {
@@ -313,12 +324,13 @@ private fun SourceCard(
     title: String,
     subtitle: String,
     badge: String?,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    enabled: Boolean = true
 ) {
     Card(
         modifier = modifier
             .height(108.dp)
-            .clickable(onClick = onClick),
+            .clickable(enabled = enabled, onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = if (badge != null) CardDefaults.outlinedCardBorder() else null

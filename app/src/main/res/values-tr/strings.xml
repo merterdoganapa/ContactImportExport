@@ -34,6 +34,8 @@
     <string name="delete_label">Sil</string>
     <string name="merge_label">Birleştir</string>
     <string name="delete_coming_soon">Silme yakında eklenecek</string>
+    <string name="contacts_deleted_count">%1$d kişi listeden kaldırıldı.</string>
+    <string name="undo_label">Geri Al</string>
     <string name="merge_coming_soon">Birleştirme yakında eklenecek</string>
     <string name="contacts_search_placeholder">Ada, e-postaya veya şirkete göre ara</string>
     <string name="duplicate_found">32 Çift Kayıt Bulundu</string>
@@ -50,6 +52,7 @@
     <string name="export_contacts_header">Kişileri Dışa Aktar</string>
     <string name="import_sources_title">İçe Aktarma Kaynakları</string>
     <string name="sim_card">SIM Kart</string>
+    <string name="phone_contacts">Telefon Kişileri</string>
     <string name="local_storage">Yerel depolama</string>
     <string name="vcf_file">VCF Dosyası</string>
     <string name="import_vcf">.vcf içe aktar</string>
@@ -59,8 +62,10 @@
     <string name="view_all">Tümünü Gör</string>
     <string name="google_sync">Google Senk.</string>
     <string name="recent_google_sync">Bugün, 10:45 • 152 kişi</string>
+    <string name="recent_phone_import">Bugün • Telefon kişilerinden içe aktarıldı</string>
     <string name="sim_slot">SIM Kart (Yuva 1)</string>
     <string name="recent_sim_sync">Dün • 48 kişi</string>
+    <string name="recent_vcf_import">Dün • VCF dosyasından içe aktarıldı</string>
     <string name="export_format_title">Dışa Aktarma Formatı</string>
     <string name="export_to_vcf">VCF olarak dışa aktar</string>
     <string name="standard_contact_format">Standart kişi formatı</string>
@@ -75,6 +80,10 @@
     <string name="all_contacts_count">Tüm Kişiler (1,248)</string>
     <string name="has_phone_number">Telefon Numarası Olanlar</string>
     <string name="only_contacts_with_digits">Sadece numara içeren kişileri dışa aktar</string>
+    <string name="phone_import_loading">Telefon kişilerinden içe aktarılıyor...</string>
+    <string name="phone_import_completed">Telefon kişileri başarıyla yüklendi.</string>
+    <string name="phone_import_permission_required">Telefondan içe aktarma için kişiler izni gerekiyor.</string>
+    <string name="no_phone_contacts_found">Telefonda kişi bulunamadı.</string>
     <string name="recents_placeholder">Son işlemler arayüzü bir sonraki adım için hazır.</string>
     <string name="settings_placeholder">Ayarlar arayüzü bir sonraki adım için hazır.</string>
 

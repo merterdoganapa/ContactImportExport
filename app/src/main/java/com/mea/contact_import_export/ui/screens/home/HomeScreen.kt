@@ -9,10 +9,18 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -30,6 +38,7 @@ import com.mea.contact_import_export.ui.screens.home.components.HomeBottomNaviga
 import com.mea.contact_import_export.ui.screens.home.components.ImportExportScreen
 import com.mea.contact_import_export.ui.screens.home.components.PlaceholderTabScreen
 import com.mea.contact_import_export.ui.screens.importcontacts.ImportContactsScreenViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun AppContent(
@@ -44,6 +53,12 @@ fun AppContent(
     val currentRoute = currentBackStackEntry?.destination?.route
     val selectedMainTab = MainTab.fromRoute(currentRoute)
     val showBottomBar = selectedMainTab != null
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+    var isPhoneImporting by rememberSaveable { mutableStateOf(false) }
+    var phoneImportRequested by rememberSaveable { mutableStateOf(false) }
+    var navigateToContactsAfterImport by rememberSaveable { mutableStateOf(false) }
+    var previousLoadingState by remember { mutableStateOf(false) }
 
     val readContactsPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -51,6 +66,9 @@ fun AppContent(
         exportUiState.hasPermission = isGranted
         if (isGranted) {
             exportContactsViewModel.loadContacts()
+        } else if (phoneImportRequested) {
+            isPhoneImporting = false
+            phoneImportRequested = false
         }
     }
 
@@ -73,26 +91,58 @@ fun AppContent(
             Manifest.permission.READ_CONTACTS
         ) == PackageManager.PERMISSION_GRANTED
         exportUiState.hasPermission = hasPermission
-        if (hasPermission) {
-            exportContactsViewModel.loadContacts()
-        } else {
-            readContactsPermissionLauncher.launch(Manifest.permission.READ_CONTACTS)
+    }
+
+    LaunchedEffect(exportUiState.isLoading, exportUiState.hasPermission, phoneImportRequested) {
+        if (!phoneImportRequested) {
+            previousLoadingState = exportUiState.isLoading
+            return@LaunchedEffect
         }
+
+        if (!exportUiState.hasPermission && !exportUiState.isLoading) {
+            isPhoneImporting = false
+            phoneImportRequested = false
+            navigateToContactsAfterImport = false
+            previousLoadingState = false
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar(context.getString(R.string.phone_import_permission_required))
+            }
+            return@LaunchedEffect
+        }
+
+        if (previousLoadingState && !exportUiState.isLoading) {
+            val message = if (exportUiState.allContacts.isEmpty()) {
+                context.getString(R.string.no_phone_contacts_found)
+            } else {
+                context.getString(R.string.phone_import_completed)
+            }
+            isPhoneImporting = false
+            phoneImportRequested = false
+            if (navigateToContactsAfterImport) {
+                navController.navigate(MainTab.Contacts.route) {
+                    launchSingleTop = true
+                }
+                navigateToContactsAfterImport = false
+            }
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar(message)
+            }
+        }
+        previousLoadingState = exportUiState.isLoading
     }
 
     Scaffold(
         containerColor = Color(0xFFF3F5F8),
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         bottomBar = {
             if (showBottomBar) {
                 HomeBottomNavigationBar(
                     selectedMainTab = selectedMainTab,
                     onTabSelected = { tab ->
-                        navController.navigate(tab.route) {
-                            popUpTo(navController.graph.startDestinationId) {
-                                saveState = true
+                        if (currentRoute != tab.route) {
+                            navController.navigate(tab.route) {
+                                launchSingleTop = true
                             }
-                            launchSingleTop = true
-                            restoreState = true
                         }
                     }
                 )
@@ -124,7 +174,19 @@ fun AppContent(
                         exportContactsViewModel.showAdAndExportContacts(activity, activity)
                     },
                     onDeleteSelected = {
-                        Toast.makeText(context, R.string.delete_coming_soon, Toast.LENGTH_SHORT).show()
+                        val removedCount = exportContactsViewModel.removeSelectedContactsFromList()
+                        if (removedCount > 0) {
+                            coroutineScope.launch {
+                                val result = snackbarHostState.showSnackbar(
+                                    message = context.getString(R.string.contacts_deleted_count, removedCount),
+                                    actionLabel = context.getString(R.string.undo_label),
+                                    withDismissAction = true
+                                )
+                                if (result == SnackbarResult.ActionPerformed) {
+                                    exportContactsViewModel.undoLastDeletedContacts()
+                                }
+                            }
+                        }
                     },
                     onMergeSelected = {
                         Toast.makeText(context, R.string.merge_coming_soon, Toast.LENGTH_SHORT).show()
@@ -140,12 +202,21 @@ fun AppContent(
                         } else {
                             MainTab.Export.route
                         }
-                        navController.navigate(targetRoute) {
-                            popUpTo(navController.graph.startDestinationId) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
+                        if (currentRoute != targetRoute) {
+                            navController.navigate(targetRoute) {
+                                launchSingleTop = true
+                            }
                         }
                     },
+                    onImportPhone = {
+                        isPhoneImporting = true
+                        phoneImportRequested = true
+                        navigateToContactsAfterImport = true
+                        exportContactsViewModel.syncContacts {
+                            readContactsPermissionLauncher.launch(Manifest.permission.READ_CONTACTS)
+                        }
+                    },
+                    isImportingPhone = isPhoneImporting,
                     onImportVcf = { importContactsViewModel.selectVcfFile() },
                     onExportToVcf = {
                         if (activity == null) return@ImportExportScreen
@@ -168,12 +239,21 @@ fun AppContent(
                         } else {
                             MainTab.Export.route
                         }
-                        navController.navigate(targetRoute) {
-                            popUpTo(navController.graph.startDestinationId) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
+                        if (currentRoute != targetRoute) {
+                            navController.navigate(targetRoute) {
+                                launchSingleTop = true
+                            }
                         }
                     },
+                    onImportPhone = {
+                        isPhoneImporting = true
+                        phoneImportRequested = true
+                        navigateToContactsAfterImport = true
+                        exportContactsViewModel.syncContacts {
+                            readContactsPermissionLauncher.launch(Manifest.permission.READ_CONTACTS)
+                        }
+                    },
+                    isImportingPhone = isPhoneImporting,
                     onImportVcf = { importContactsViewModel.selectVcfFile() },
                     onExportToVcf = {
                         if (activity == null) return@ImportExportScreen

@@ -35,6 +35,7 @@ class ExportContactsScreenViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(ExportContactsUIState())
     val uiState: StateFlow<ExportContactsUIState> = _uiState.asStateFlow()
+    private var lastDeletedContacts: List<Contact> = emptyList()
 
     fun loadContacts() {
         viewModelScope.launch {
@@ -60,6 +61,37 @@ class ExportContactsScreenViewModel @Inject constructor(
 
     fun updateSelectedContacts(contacts: MutableList<Contact>) {
         _uiState.update { it.copy(selectedContacts = contacts) }
+    }
+
+    fun removeSelectedContactsFromList(): Int {
+        val currentState = _uiState.value
+        val selected = currentState.selectedContacts.toList()
+        if (selected.isEmpty()) return 0
+
+        lastDeletedContacts = selected
+        val remaining = currentState.allContacts.filterNot { selected.contains(it) }
+        _uiState.update {
+            it.copy(
+                allContacts = remaining,
+                selectedContacts = mutableListOf()
+            )
+        }
+        return selected.size
+    }
+
+    fun undoLastDeletedContacts() {
+        if (lastDeletedContacts.isEmpty()) return
+        val restored = (_uiState.value.allContacts + lastDeletedContacts)
+            .distinctBy { "${it.id}|${it.phoneNumber}|${it.name}" }
+            .sortedBy { it.name.lowercase() }
+
+        _uiState.update {
+            it.copy(
+                allContacts = restored,
+                selectedContacts = lastDeletedContacts.toMutableList()
+            )
+        }
+        lastDeletedContacts = emptyList()
     }
 
     private suspend fun fetchContacts(): List<Contact> = withContext(Dispatchers.IO) {
