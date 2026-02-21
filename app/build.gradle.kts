@@ -15,7 +15,7 @@ android {
         applicationId = "com.mea.contact_import_export"
         minSdk = 28
         targetSdk = 35
-        versionCode = 14
+        versionCode = 18
         versionName = "2.0"
         buildConfigField("String", "REVENUECAT_ENTITLEMENT_PRO_ID", "\"pro_entitlement\"")
         buildConfigField("String", "REVENUECAT_PRO_PRODUCT_ID", "\"pro\"")
@@ -62,6 +62,9 @@ android {
         kotlinCompilerExtensionVersion = "1.5.1"
     }
     packaging {
+        jniLibs {
+            useLegacyPackaging = false
+        }
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }

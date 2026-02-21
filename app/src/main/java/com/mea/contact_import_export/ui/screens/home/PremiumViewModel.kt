@@ -18,7 +18,8 @@ import kotlinx.coroutines.launch
 data class PremiumUiState(
     val isProUser: Boolean = false,
     val isPurchaseLoading: Boolean = false,
-    val isRestoreLoading: Boolean = false
+    val isRestoreLoading: Boolean = false,
+    val revenueCatAppUserId: String = ""
 )
 
 @HiltViewModel
@@ -33,6 +34,11 @@ class PremiumViewModel @Inject constructor(
         viewModelScope.launch {
             premiumManager.isProUser.collect { isPro ->
                 _uiState.update { it.copy(isProUser = isPro) }
+            }
+        }
+        viewModelScope.launch {
+            premiumManager.appUserId.collect { appUserId ->
+                _uiState.update { it.copy(revenueCatAppUserId = appUserId) }
             }
         }
     }

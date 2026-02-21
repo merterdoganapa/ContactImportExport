@@ -61,4 +61,10 @@ object ImportHistoryPreference {
             prefs[KEY_RECENT_IMPORTS] = Json.encodeToString(updated.take(MAX_HISTORY_ITEMS))
         }
     }
+
+    suspend fun clearRecentImports(context: Context) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_RECENT_IMPORTS] = Json.encodeToString(emptyList<ImportHistoryEntry>())
+        }
+    }
 }

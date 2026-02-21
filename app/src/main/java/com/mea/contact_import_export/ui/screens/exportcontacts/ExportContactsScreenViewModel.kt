@@ -110,11 +110,11 @@ class ExportContactsScreenViewModel @Inject constructor(
             val phoneIndex = it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
 
             while (it.moveToNext()) {
-                val id = it.getString(idIndex)
-                val name = it.getString(nameIndex)
-                var phoneNumber = it.getString(phoneIndex)
-                var address = ""
-                var email = ""
+                val id = if (idIndex >= 0) it.getString(idIndex).orEmpty() else ""
+                val name = if (nameIndex >= 0) it.getString(nameIndex).orEmpty() else ""
+                var phoneNumber = if (phoneIndex >= 0) it.getString(phoneIndex) else null
+                var address: String? = null
+                var email: String? = null
 
                 phoneNumber = phoneNumber?.replace(Regex("[^\\d+]"), "") ?: ""
 
@@ -125,15 +125,15 @@ class ExportContactsScreenViewModel @Inject constructor(
                     arrayOf(id), null
                 )
 
-                emailCur?.apply {
-                    while (this.moveToNext()) {
+                emailCur?.use {
+                    while (it.moveToNext()) {
                         val emailIndex =
-                            this.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA)
-                        email = this.getString(emailIndex)
+                            it.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA)
+                        if (emailIndex >= 0) {
+                            email = it.getString(emailIndex)
+                        }
                     }
                 }
-
-                emailCur?.close()
 
                 val addressCur = contentResolver.query(
                     ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_URI,
@@ -142,15 +142,15 @@ class ExportContactsScreenViewModel @Inject constructor(
                     arrayOf(id), null
                 )
 
-                addressCur?.apply {
-                    while (this.moveToNext()) {
+                addressCur?.use {
+                    while (it.moveToNext()) {
                         val addressIndex =
-                            this.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS)
-                        address = this.getString(addressIndex)
+                            it.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS)
+                        if (addressIndex >= 0) {
+                            address = it.getString(addressIndex)
+                        }
                     }
                 }
-
-                addressCur?.close()
 
                 // Check if the contact with this phone number already exists
                 val existingContact = contacts[phoneNumber]
@@ -158,8 +158,8 @@ class ExportContactsScreenViewModel @Inject constructor(
                 if (existingContact != null) {
                     // If the contact exists, update the fields (only if they are non-empty)
                     val updatedAddress =
-                        if (address.isNotEmpty()) address else existingContact.address
-                    val updatedEmail = if (email.isNotEmpty()) email else existingContact.email
+                        if (!address.isNullOrEmpty()) address else existingContact.address
+                    val updatedEmail = if (!email.isNullOrEmpty()) email else existingContact.email
 
                     // Update the contact in the map
                     contacts[phoneNumber] =

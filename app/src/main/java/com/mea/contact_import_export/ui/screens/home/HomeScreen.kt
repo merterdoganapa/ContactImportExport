@@ -1,9 +1,12 @@
 package com.mea.contact_import_export.ui.screens.home
 
 import android.Manifest
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import android.app.Activity
 import android.app.Activity.RESULT_OK
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -14,6 +17,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,8 +27,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
@@ -37,11 +45,15 @@ import com.mea.contact_import_export.data.PurchaseResult
 import com.mea.contact_import_export.data.RestoreResult
 import com.mea.contact_import_export.ui.screens.exportcontacts.ExportContactsScreenViewModel
 import com.mea.contact_import_export.ui.screens.home.components.ContactsScreen
+import com.mea.contact_import_export.ui.screens.home.components.ExportScreen
 import com.mea.contact_import_export.ui.screens.home.components.HomeBottomNavigationBar
-import com.mea.contact_import_export.ui.screens.home.components.ImportExportScreen
+import com.mea.contact_import_export.ui.screens.home.components.ImportHistoryScreen
+import com.mea.contact_import_export.ui.screens.home.components.ImportScreen
 import com.mea.contact_import_export.ui.screens.home.components.SettingsScreen
 import com.mea.contact_import_export.ui.screens.importcontacts.ImportContactsScreenViewModel
 import kotlinx.coroutines.launch
+
+private const val IMPORT_HISTORY_ROUTE = "import_history"
 
 @Composable
 fun AppContent(
@@ -50,6 +62,7 @@ fun AppContent(
     premiumViewModel: PremiumViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
+    val clipboardManager = LocalClipboardManager.current
     val activity = context as? Activity
     val exportUiState by exportContactsViewModel.uiState.collectAsState()
     val premiumUiState by premiumViewModel.uiState.collectAsState()
@@ -57,8 +70,18 @@ fun AppContent(
     val navController = rememberNavController()
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
+    val titleBarRoutes = remember {
+        setOf(
+            MainTab.Import.route,
+            MainTab.Export.route,
+            MainTab.Settings.route,
+            IMPORT_HISTORY_ROUTE
+        )
+    }
     val selectedMainTab = MainTab.fromRoute(currentRoute)
     val showBottomBar = selectedMainTab != null
+    val systemBarColor = if (currentRoute in titleBarRoutes) Color.White else Color(0xFFF3F5F8)
+    val navigationBarColor = if (showBottomBar) Color.White else Color(0xFFF3F5F8)
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     var isPhoneImporting by rememberSaveable { mutableStateOf(false) }
@@ -66,6 +89,15 @@ fun AppContent(
     var navigateToContactsAfterImport by rememberSaveable { mutableStateOf(false) }
     var defaultExportContactGroup by rememberSaveable { mutableStateOf(ExportContactGroup.All) }
     var previousLoadingState by remember { mutableStateOf(false) }
+
+    SideEffect {
+        val window = activity?.window ?: return@SideEffect
+        val controller = WindowInsetsControllerCompat(window, window.decorView)
+        window.statusBarColor = systemBarColor.toArgb()
+        window.navigationBarColor = navigationBarColor.toArgb()
+        controller.isAppearanceLightStatusBars = true
+        controller.isAppearanceLightNavigationBars = true
+    }
 
     val readContactsPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -196,6 +228,13 @@ fun AppContent(
                     onSelectContacts = { contacts ->
                         exportContactsViewModel.updateSelectedContacts(contacts.toMutableList())
                     },
+                    onImportContacts = {
+                        if (currentRoute != MainTab.Import.route) {
+                            navController.navigate(MainTab.Import.route) {
+                                launchSingleTop = true
+                            }
+                        }
+                    },
                     onExportSelected = {
                         defaultExportContactGroup = if (exportUiState.selectedContacts.isNotEmpty()) {
                             ExportContactGroup.Selected
@@ -229,20 +268,7 @@ fun AppContent(
                 )
             }
             composable(MainTab.Import.route) {
-                ImportExportScreen(
-                    selectedTab = ImportExportTab.Import,
-                    onSelectTab = { selectedTab ->
-                        val targetRoute = if (selectedTab == ImportExportTab.Import) {
-                            MainTab.Import.route
-                        } else {
-                            MainTab.Export.route
-                        }
-                        if (currentRoute != targetRoute) {
-                            navController.navigate(targetRoute) {
-                                launchSingleTop = true
-                            }
-                        }
-                    },
+                ImportScreen(
                     onImportPhone = {
                         isPhoneImporting = true
                         phoneImportRequested = true
@@ -253,50 +279,41 @@ fun AppContent(
                     },
                     isImportingPhone = isPhoneImporting,
                     onImportVcf = { importContactsViewModel.selectVcfFile() },
-                    defaultExportContactGroup = defaultExportContactGroup,
-                    allContactsCount = exportUiState.allContacts.size,
-                    selectedContactsCount = exportUiState.selectedContacts.size,
-                    onExportRequest = { _, _ -> },
+                    onViewAllRecentImports = {
+                        if (currentRoute != IMPORT_HISTORY_ROUTE) {
+                            navController.navigate(IMPORT_HISTORY_ROUTE) {
+                                launchSingleTop = true
+                            }
+                        }
+                    },
                     recentImports = recentImports
                 )
             }
+            composable(IMPORT_HISTORY_ROUTE) {
+                ImportHistoryScreen(
+                    history = recentImports,
+                    onBack = { navController.popBackStack() },
+                    onClearAll = {
+                        coroutineScope.launch {
+                            ImportHistoryPreference.clearRecentImports(context)
+                            snackbarHostState.showSnackbar(context.getString(R.string.recent_imports_cleared))
+                        }
+                    }
+                )
+            }
             composable(MainTab.Export.route) {
-                ImportExportScreen(
-                    selectedTab = ImportExportTab.Export,
-                    onSelectTab = { selectedTab ->
-                        val targetRoute = if (selectedTab == ImportExportTab.Import) {
-                            MainTab.Import.route
-                        } else {
-                            MainTab.Export.route
-                        }
-                        if (currentRoute != targetRoute) {
-                            navController.navigate(targetRoute) {
-                                launchSingleTop = true
-                            }
-                        }
-                    },
-                    onImportPhone = {
-                        isPhoneImporting = true
-                        phoneImportRequested = true
-                        navigateToContactsAfterImport = true
-                        exportContactsViewModel.syncContacts {
-                            readContactsPermissionLauncher.launch(Manifest.permission.READ_CONTACTS)
-                        }
-                    },
-                    isImportingPhone = isPhoneImporting,
-                    onImportVcf = { importContactsViewModel.selectVcfFile() },
+                ExportScreen(
                     defaultExportContactGroup = defaultExportContactGroup,
                     allContactsCount = exportUiState.allContacts.size,
                     selectedContactsCount = exportUiState.selectedContacts.size,
-                    recentImports = recentImports,
                     onExportRequest = { group, format ->
                         if (format == "csv" && !premiumUiState.isProUser) {
                             coroutineScope.launch {
                                 snackbarHostState.showSnackbar(context.getString(R.string.csv_pro_required))
                             }
-                            return@ImportExportScreen
+                            return@ExportScreen
                         }
-                        if (activity == null) return@ImportExportScreen
+                        if (activity == null) return@ExportScreen
                         val selected = when (group) {
                             ExportContactGroup.All -> exportUiState.allContacts.toMutableList()
                             ExportContactGroup.Selected -> exportUiState.selectedContacts.toMutableList()
@@ -305,7 +322,7 @@ fun AppContent(
                             coroutineScope.launch {
                                 snackbarHostState.showSnackbar(context.getString(R.string.no_contacts_to_export_now))
                             }
-                            return@ImportExportScreen
+                            return@ExportScreen
                         }
                         exportContactsViewModel.updateSelectedContacts(selected)
                         exportContactsViewModel.showAdAndExportContacts(
@@ -321,6 +338,7 @@ fun AppContent(
                     isProUser = premiumUiState.isProUser,
                     isPurchaseLoading = premiumUiState.isPurchaseLoading,
                     isRestoreLoading = premiumUiState.isRestoreLoading,
+                    revenueCatAppUserId = premiumUiState.revenueCatAppUserId,
                     onBuyProClick = {
                         if (activity != null) {
                             premiumViewModel.buyPro(activity) { result ->
@@ -352,11 +370,54 @@ fun AppContent(
                             }
                         }
                     },
-                    onNavigateToTab = { tab ->
-                        if (currentRoute != tab.route) {
-                            navController.navigate(tab.route) {
-                                launchSingleTop = true
+                    onRevenueCatIdClick = {
+                        val appUserId = premiumUiState.revenueCatAppUserId
+                        if (appUserId.isNotBlank()) {
+                            clipboardManager.setText(AnnotatedString(appUserId))
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar(
+                                    context.getString(R.string.settings_account_id_copied)
+                                )
                             }
+                        }
+                    },
+                    onPrivacyPolicyClick = {
+                        val privacyIntent = Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse("https://www.freeprivacypolicy.com/live/670ba55d-53d1-457b-bc83-042bcfafd8f7")
+                        )
+                        try {
+                            context.startActivity(privacyIntent)
+                        } catch (_: ActivityNotFoundException) {
+                        }
+                    },
+                    onContactUsClick = {
+                        val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
+                            data = Uri.parse("mailto:kokoappsinfo@gmail.com")
+                            putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.settings_contact_subject))
+                        }
+                        try {
+                            context.startActivity(emailIntent)
+                        } catch (_: ActivityNotFoundException) {
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar(context.getString(R.string.settings_no_email_app))
+                            }
+                        }
+                    },
+                    onRateUsClick = {
+                        val packageName = context.packageName
+                        val marketIntent = Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse("market://details?id=$packageName")
+                        )
+                        val webIntent = Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse("https://play.google.com/store/apps/details?id=$packageName")
+                        )
+                        try {
+                            context.startActivity(marketIntent)
+                        } catch (_: ActivityNotFoundException) {
+                            context.startActivity(webIntent)
                         }
                     }
                 )

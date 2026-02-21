@@ -122,5 +122,27 @@
     <string name="restore_not_found">Bu hesap için Pro satın alımı bulunamadı.</string>
     <string name="restore_failed">Geri yükleme başarısız oldu. Lütfen tekrar deneyin.</string>
     <string name="csv_pro_required">CSV dışa aktarma Pro özelliğidir.</string>
+    <string name="clear_all">Tümünü Temizle</string>
+    <string name="recent_imports_cleared">Son içe aktarmalar temizlendi.</string>
+    <string name="contacts_empty_title">Henüz kişi yok</string>
+    <string name="contacts_empty_description">Kişi listeniz şu anda boş. Kişi ekleyerek veya içe aktararak ağınızı oluşturmaya başlayın.</string>
+    <string name="contacts_empty_import_title">Kişilerinizi içe aktarın</string>
+    <string name="contacts_empty_import_description">Hızlı başlamak için kişilerinizi bir VCF dosyasından veya SIM karttan getirin.</string>
+    <string name="contacts_empty_export_title">Dışa Aktar ve Paylaş</string>
+    <string name="contacts_empty_export_description">Kişilerinizi senkron tutun ve gerektiğinde VCF olarak paylaşın.</string>
+    <string name="go_to_export">Dışa Aktar\'a Git</string>
+    <string name="settings_upgrade_pro_title">PRO\'ya Yükselt</string>
+    <string name="settings_upgrade_pro_subtitle">Bulut Yedekleme, Akıllı Temizlik ve daha fazla özelliğin kilidini açın.</string>
+    <string name="settings_upgrade_now">Şimdi Yükselt</string>
+    <string name="settings_app_version_value_compact">%1$s (Build %2$d)</string>
+    <string name="settings_account_id">Hesap Kimliği</string>
+    <string name="settings_account_id_copied">Hesap kimliği kopyalandı.</string>
+    <string name="settings_not_available_short">Yok</string>
+    <string name="settings_privacy_policy_terms">Gizlilik Politikası &amp; Şartlar</string>
+    <string name="settings_support_section">Destek</string>
+    <string name="settings_contact_us">Bize Ulaşın</string>
+    <string name="settings_rate_us">Bizi Değerlendir</string>
+    <string name="settings_contact_subject">Contact Import &amp; Export Destek</string>
+    <string name="settings_no_email_app">E-posta uygulaması bulunamadı.</string>
 
 </resources>

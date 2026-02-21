@@ -27,10 +27,15 @@ class PremiumManager @Inject constructor(
 ) {
     private val _isProUser = MutableStateFlow(false)
     val isProUser: StateFlow<Boolean> = _isProUser.asStateFlow()
+    private val _appUserId = MutableStateFlow("")
+    val appUserId: StateFlow<String> = _appUserId.asStateFlow()
 
     init {
         configureIfNeeded()
         refreshCustomerInfo()
+        if (Purchases.isConfigured) {
+            _appUserId.value = Purchases.sharedInstance.appUserID.orEmpty()
+        }
     }
 
     suspend fun purchaseRemoveAds(activity: Activity): Boolean {
@@ -76,6 +81,7 @@ class PremiumManager @Inject constructor(
             object : ReceiveCustomerInfoCallback {
                 override fun onReceived(customerInfo: CustomerInfo) {
                     updateProState(customerInfo)
+                    _appUserId.value = customerInfo.originalAppUserId
                 }
 
                 override fun onError(error: PurchasesError) {
@@ -110,6 +116,7 @@ class PremiumManager @Inject constructor(
         val entitlementId = BuildConfig.REVENUECAT_ENTITLEMENT_PRO_ID
         val entitlement = customerInfo.entitlements[entitlementId]
         _isProUser.value = entitlement?.isActive == true
+        _appUserId.value = customerInfo.originalAppUserId
     }
 
     companion object {
