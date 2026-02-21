@@ -33,22 +33,26 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.mea.contact_import_export.R
 import com.mea.contact_import_export.data.ImportHistoryPreference
+import com.mea.contact_import_export.data.PurchaseResult
+import com.mea.contact_import_export.data.RestoreResult
 import com.mea.contact_import_export.ui.screens.exportcontacts.ExportContactsScreenViewModel
 import com.mea.contact_import_export.ui.screens.home.components.ContactsScreen
 import com.mea.contact_import_export.ui.screens.home.components.HomeBottomNavigationBar
 import com.mea.contact_import_export.ui.screens.home.components.ImportExportScreen
-import com.mea.contact_import_export.ui.screens.home.components.PlaceholderTabScreen
+import com.mea.contact_import_export.ui.screens.home.components.SettingsScreen
 import com.mea.contact_import_export.ui.screens.importcontacts.ImportContactsScreenViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun AppContent(
     importContactsViewModel: ImportContactsScreenViewModel = hiltViewModel(),
-    exportContactsViewModel: ExportContactsScreenViewModel = hiltViewModel()
+    exportContactsViewModel: ExportContactsScreenViewModel = hiltViewModel(),
+    premiumViewModel: PremiumViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val activity = context as? Activity
     val exportUiState by exportContactsViewModel.uiState.collectAsState()
+    val premiumUiState by premiumViewModel.uiState.collectAsState()
     val recentImports by ImportHistoryPreference.recentImportsFlow(context).collectAsState(initial = emptyList())
     val navController = rememberNavController()
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
@@ -286,9 +290,9 @@ fun AppContent(
                     selectedContactsCount = exportUiState.selectedContacts.size,
                     recentImports = recentImports,
                     onExportRequest = { group, format ->
-                        if (format != "vcf") {
+                        if (format == "csv" && !premiumUiState.isProUser) {
                             coroutineScope.launch {
-                                snackbarHostState.showSnackbar(context.getString(R.string.export_format_not_supported))
+                                snackbarHostState.showSnackbar(context.getString(R.string.csv_pro_required))
                             }
                             return@ImportExportScreen
                         }
@@ -304,14 +308,57 @@ fun AppContent(
                             return@ImportExportScreen
                         }
                         exportContactsViewModel.updateSelectedContacts(selected)
-                        exportContactsViewModel.showAdAndExportContacts(activity, activity)
+                        exportContactsViewModel.showAdAndExportContacts(
+                            activity = activity,
+                            context = activity,
+                            format = format
+                        )
                     }
                 )
             }
             composable(MainTab.Settings.route) {
-                PlaceholderTabScreen(
-                    title = stringResource(id = R.string.settings_tab),
-                    subtitle = stringResource(id = R.string.settings_placeholder)
+                SettingsScreen(
+                    isProUser = premiumUiState.isProUser,
+                    isPurchaseLoading = premiumUiState.isPurchaseLoading,
+                    isRestoreLoading = premiumUiState.isRestoreLoading,
+                    onBuyProClick = {
+                        if (activity != null) {
+                            premiumViewModel.buyPro(activity) { result ->
+                                val messageRes = when (result) {
+                                    PurchaseResult.Success -> R.string.purchase_success
+                                    PurchaseResult.AlreadyPro -> R.string.already_pro
+                                    PurchaseResult.NotActive -> R.string.purchase_not_active
+                                    is PurchaseResult.Error -> R.string.purchase_failed
+                                }
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar(context.getString(messageRes))
+                                }
+                            }
+                        } else {
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar(context.getString(R.string.purchase_failed))
+                            }
+                        }
+                    },
+                    onRestorePurchasesClick = {
+                        premiumViewModel.restorePurchases { result ->
+                            val messageRes = when (result) {
+                                RestoreResult.Success -> R.string.restore_success
+                                RestoreResult.NotFound -> R.string.restore_not_found
+                                is RestoreResult.Error -> R.string.restore_failed
+                            }
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar(context.getString(messageRes))
+                            }
+                        }
+                    },
+                    onNavigateToTab = { tab ->
+                        if (currentRoute != tab.route) {
+                            navController.navigate(tab.route) {
+                                launchSingleTop = true
+                            }
+                        }
+                    }
                 )
             }
         }

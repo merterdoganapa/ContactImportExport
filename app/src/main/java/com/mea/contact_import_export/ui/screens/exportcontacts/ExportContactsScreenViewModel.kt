@@ -183,7 +183,14 @@ class ExportContactsScreenViewModel @Inject constructor(
         }
     }
 
-    fun exportContacts(context: Context) {
+    fun exportContacts(context: Context, format: String) {
+        when (format.lowercase()) {
+            "csv" -> exportCsv(context)
+            else -> exportVcf(context)
+        }
+    }
+
+    private fun exportVcf(context: Context) {
         val vCardData = StringBuilder()
         for (contact in _uiState.value.selectedContacts) {
             vCardData.append(createVCard(contact)).append("\n")
@@ -193,7 +200,31 @@ class ExportContactsScreenViewModel @Inject constructor(
             val fos = FileOutputStream(file)
             fos.write(vCardData.toString().toByteArray())
             fos.close()
-            shareVCardFile(context, file)
+            shareFile(context, file, "text/x-vcard")
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun exportCsv(context: Context) {
+        val csvData = StringBuilder()
+        csvData.append("name,phone,email,address\n")
+        for (contact in _uiState.value.selectedContacts) {
+            csvData.append(
+                listOf(
+                    contact.name,
+                    contact.phoneNumber ?: "",
+                    contact.email ?: "",
+                    contact.address ?: ""
+                ).joinToString(",") { escapeCsv(it) }
+            ).append("\n")
+        }
+        try {
+            val file = File(context.getExternalFilesDir(null), "contacts_export.csv")
+            val fos = FileOutputStream(file)
+            fos.write(csvData.toString().toByteArray())
+            fos.close()
+            shareFile(context, file, "text/csv")
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -211,7 +242,7 @@ class ExportContactsScreenViewModel @Inject constructor(
     """.trimIndent()
     }
 
-    private fun shareVCardFile(context: Context, file: File) {
+    private fun shareFile(context: Context, file: File, mimeType: String) {
         val uri: Uri = FileProvider.getUriForFile(
             context,
             "${context.packageName}.provider",
@@ -219,7 +250,7 @@ class ExportContactsScreenViewModel @Inject constructor(
         )
 
         val intent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/x-vcard"
+            type = mimeType
             putExtra(Intent.EXTRA_STREAM, uri)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
@@ -232,17 +263,26 @@ class ExportContactsScreenViewModel @Inject constructor(
     }
 
     fun showAdAndExportContacts(activity: Activity, context: Activity) {
+        showAdAndExportContacts(activity, context, "vcf")
+    }
+
+    fun showAdAndExportContacts(activity: Activity, context: Activity, format: String) {
         adManager.showRewardedAd(
             activity,
             onRewarded = {
-                exportContacts(context)
+                exportContacts(context, format)
             },
             onAdClosed = {
             },
             onAdFailedToShow = {
-                exportContacts(context)
+                exportContacts(context, format)
             }
         )
+    }
+
+    private fun escapeCsv(value: String): String {
+        val escaped = value.replace("\"", "\"\"")
+        return "\"$escaped\""
     }
 
 }

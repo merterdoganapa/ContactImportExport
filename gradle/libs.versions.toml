@@ -23,6 +23,7 @@ material = "1.5.0-alpha04"  # Use the latest version from the list you provided
 kotlinx-serialization-json = "1.6.2"
 kotlinx-datetime = "0.5.0"
 playServicesAds = "23.6.0"
+revenuecatPurchases = "8.20.0"
 
 
 [libraries]
@@ -53,6 +54,7 @@ androidx-media3-ui = { group = "androidx.media3", name = "media3-ui", version.re
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 play-services-ads = { group = "com.google.android.gms", name = "play-services-ads", version.ref = "playServicesAds" }
+revenuecat-purchases = { group = "com.revenuecat.purchases", name = "purchases", version.ref = "revenuecatPurchases" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

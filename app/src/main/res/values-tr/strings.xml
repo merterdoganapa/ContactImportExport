@@ -95,5 +95,32 @@
     <string name="no_phone_contacts_found">Telefonda kişi bulunamadı.</string>
     <string name="recents_placeholder">Son işlemler arayüzü bir sonraki adım için hazır.</string>
     <string name="settings_placeholder">Ayarlar arayüzü bir sonraki adım için hazır.</string>
+    <string name="settings_import_export_section">İçe / Dışa Aktar</string>
+    <string name="settings_default_format">Varsayılan Format</string>
+    <string name="settings_default_format_value">VCF (vCard)</string>
+    <string name="settings_export_contacts_item">Kişileri Dışa Aktar</string>
+    <string name="settings_tools_section">Araçlar</string>
+    <string name="settings_smart_duplicate_finder">Akıllı Çift Kayıt Bulucu</string>
+    <string name="settings_clean_up_contacts">Kişileri Temizle</string>
+    <string name="settings_about_section">Hakkında</string>
+    <string name="settings_premium_section">Premium</string>
+    <string name="settings_buy_pro">Pro Kilidini Aç (Tek seferlik satın alma)</string>
+    <string name="settings_buy_pro_subtitle">Reklamları kaldır ve Pro özelliklerin kilidini kalıcı aç.</string>
+    <string name="settings_purchase_in_progress">Satın alma işlemi sürüyor...</string>
+    <string name="settings_restore_purchases">Satın alımları geri yükle</string>
+    <string name="settings_restore_in_progress">Önceki satın alımlar kontrol ediliyor...</string>
+    <string name="settings_premium_active_title">Pro aktif</string>
+    <string name="settings_premium_active_subtitle">Reklamlar kapatıldı ve Pro özellikler açıldı.</string>
+    <string name="settings_app_version">Uygulama Sürümü</string>
+    <string name="settings_app_version_value">v%1$s (Build %2$d)</string>
+    <string name="purchase_success">Satın alma tamamlandı. Pro artık aktif.</string>
+    <string name="purchase_cancelled">Satın alma iptal edildi.</string>
+    <string name="purchase_not_active">Satın alma tamamlandı ancak Pro henüz aktif değil.</string>
+    <string name="purchase_failed">Satın alma başarısız oldu. Lütfen tekrar deneyin.</string>
+    <string name="already_pro">Bu hesapta Pro zaten aktif.</string>
+    <string name="restore_success">Satın alımlar geri yüklendi. Pro aktif.</string>
+    <string name="restore_not_found">Bu hesap için Pro satın alımı bulunamadı.</string>
+    <string name="restore_failed">Geri yükleme başarısız oldu. Lütfen tekrar deneyin.</string>
+    <string name="csv_pro_required">CSV dışa aktarma Pro özelliğidir.</string>
 
 </resources>
