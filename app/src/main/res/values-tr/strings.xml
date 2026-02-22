@@ -132,7 +132,7 @@
     <string name="contacts_empty_export_description">Kişilerinizi senkron tutun ve gerektiğinde VCF olarak paylaşın.</string>
     <string name="go_to_export">Dışa Aktar\'a Git</string>
     <string name="settings_upgrade_pro_title">PRO\'ya Yükselt</string>
-    <string name="settings_upgrade_pro_subtitle">Bulut Yedekleme, Akıllı Temizlik ve daha fazla özelliğin kilidini açın.</string>
+    <string name="settings_upgrade_pro_subtitle">Reklamları devre dışı bırakın ve Pro özelliklerin kilidini açın.</string>
     <string name="settings_upgrade_now">Şimdi Yükselt</string>
     <string name="settings_app_version_value_compact">%1$s (Build %2$d)</string>
     <string name="settings_account_id">Hesap Kimliği</string>

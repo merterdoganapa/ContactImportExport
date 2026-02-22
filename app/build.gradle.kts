@@ -15,7 +15,7 @@ android {
         applicationId = "com.mea.contact_import_export"
         minSdk = 28
         targetSdk = 35
-        versionCode = 18
+        versionCode = 20
         versionName = "2.0"
         buildConfigField("String", "REVENUECAT_ENTITLEMENT_PRO_ID", "\"pro_entitlement\"")
         buildConfigField("String", "REVENUECAT_PRO_PRODUCT_ID", "\"pro\"")

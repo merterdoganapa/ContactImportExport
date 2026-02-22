@@ -114,7 +114,7 @@
     <string name="settings_premium_active_title">Pro is active</string>
     <string name="settings_premium_active_subtitle">Ads are disabled and Pro features are unlocked.</string>
     <string name="settings_upgrade_pro_title">Upgrade to PRO</string>
-    <string name="settings_upgrade_pro_subtitle">Unlock Cloud Backup, Smart Clean, and more features.</string>
+    <string name="settings_upgrade_pro_subtitle">Disable ads and unlock Pro features.</string>
     <string name="settings_upgrade_now">Upgrade Now</string>
     <string name="settings_app_version">App Version</string>
     <string name="settings_app_version_value">v%1$s (Build %2$d)</string>
