@@ -113,17 +113,15 @@ class AdManager @Inject constructor(
             }
         }
 
-//        rewardedAd.show(
-//            activity,
-//            OnUserEarnedRewardListener { rewardItem ->
-//                val rewardAmount = rewardItem.amount
-//                val rewardType = rewardItem.type
-//                Log.d(TAG, "User earned reward: $rewardAmount $rewardType")
-//                onRewarded()
-//            }
-//        )
-
-        onRewarded()
+        rewardedAd.show(
+            activity,
+            OnUserEarnedRewardListener { rewardItem ->
+                val rewardAmount = rewardItem.amount
+                val rewardType = rewardItem.type
+                Log.d(TAG, "User earned reward: $rewardAmount $rewardType")
+                onRewarded()
+            }
+        )
     }
 
     fun isRewardedAdAvailable(): Boolean {
