@@ -1,28 +1,29 @@
 [versions]
-agp = "8.5.0"
+agp = "8.5.2"
 kotlin = "2.0.0"
 kotlin-kapt = "2.0.10"
 ksp = "2.0.0-1.0.21"
 androidxActivity = "1.9.1"
 androidxCore = "1.13.1"
 androidxLifecycle = "2.8.4"
-androidxCompose = "1.7.0-beta07"
-androidxComposeMaterial3 = "1.3.0-beta05"
-androidxNavigation = "2.8.0-beta04"
+androidxCompose = "1.7.8"
+androidxComposeMaterial3 = "1.3.1"
+androidxNavigation = "2.8.6"
 androidxHiltNavigationCompose = "1.2.0"
 hilt = "2.51.1"
 coroutines = "1.8.1"
 junit = "4.13.2"
 androidxTestJunit = "1.2.1"
 espresso = "3.6.1"
-datastoreCoreAndroid = "1.1.1"
-datastorePreferences= "1.0.0"
-media3Exoplayer = "1.4.0"
-media3Ui = "1.4.0"
-material = "1.5.0-alpha04"  # Use the latest version from the list you provided
+datastoreCoreAndroid = "1.1.2"
+datastorePreferences= "1.1.2"
+media3Exoplayer = "1.5.1"
+media3Ui = "1.5.1"
+material = "1.7.6"
 kotlinx-serialization-json = "1.6.2"
 kotlinx-datetime = "0.5.0"
 playServicesAds = "23.6.0"
+revenuecatPurchases = "8.20.0"
 
 
 [libraries]
@@ -53,6 +54,7 @@ androidx-media3-ui = { group = "androidx.media3", name = "media3-ui", version.re
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 play-services-ads = { group = "com.google.android.gms", name = "play-services-ads", version.ref = "playServicesAds" }
+revenuecat-purchases = { group = "com.revenuecat.purchases", name = "purchases", version.ref = "revenuecatPurchases" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

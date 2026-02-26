@@ -35,6 +35,7 @@ class ExportContactsScreenViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(ExportContactsUIState())
     val uiState: StateFlow<ExportContactsUIState> = _uiState.asStateFlow()
+    private var lastDeletedContacts: List<Contact> = emptyList()
 
     fun loadContacts() {
         viewModelScope.launch {
@@ -62,6 +63,37 @@ class ExportContactsScreenViewModel @Inject constructor(
         _uiState.update { it.copy(selectedContacts = contacts) }
     }
 
+    fun removeSelectedContactsFromList(): Int {
+        val currentState = _uiState.value
+        val selected = currentState.selectedContacts.toList()
+        if (selected.isEmpty()) return 0
+
+        lastDeletedContacts = selected
+        val remaining = currentState.allContacts.filterNot { selected.contains(it) }
+        _uiState.update {
+            it.copy(
+                allContacts = remaining,
+                selectedContacts = mutableListOf()
+            )
+        }
+        return selected.size
+    }
+
+    fun undoLastDeletedContacts() {
+        if (lastDeletedContacts.isEmpty()) return
+        val restored = (_uiState.value.allContacts + lastDeletedContacts)
+            .distinctBy { "${it.id}|${it.phoneNumber}|${it.name}" }
+            .sortedBy { it.name.lowercase() }
+
+        _uiState.update {
+            it.copy(
+                allContacts = restored,
+                selectedContacts = lastDeletedContacts.toMutableList()
+            )
+        }
+        lastDeletedContacts = emptyList()
+    }
+
     private suspend fun fetchContacts(): List<Contact> = withContext(Dispatchers.IO) {
         val contacts = mutableMapOf<String, Contact>()
         val cursor = contentResolver.query(
@@ -78,11 +110,11 @@ class ExportContactsScreenViewModel @Inject constructor(
             val phoneIndex = it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
 
             while (it.moveToNext()) {
-                val id = it.getString(idIndex)
-                val name = it.getString(nameIndex)
-                var phoneNumber = it.getString(phoneIndex)
-                var address = ""
-                var email = ""
+                val id = if (idIndex >= 0) it.getString(idIndex).orEmpty() else ""
+                val name = if (nameIndex >= 0) it.getString(nameIndex).orEmpty() else ""
+                var phoneNumber = if (phoneIndex >= 0) it.getString(phoneIndex) else null
+                var address: String? = null
+                var email: String? = null
 
                 phoneNumber = phoneNumber?.replace(Regex("[^\\d+]"), "") ?: ""
 
@@ -93,15 +125,15 @@ class ExportContactsScreenViewModel @Inject constructor(
                     arrayOf(id), null
                 )
 
-                emailCur?.apply {
-                    while (this.moveToNext()) {
+                emailCur?.use {
+                    while (it.moveToNext()) {
                         val emailIndex =
-                            this.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA)
-                        email = this.getString(emailIndex)
+                            it.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA)
+                        if (emailIndex >= 0) {
+                            email = it.getString(emailIndex)
+                        }
                     }
                 }
-
-                emailCur?.close()
 
                 val addressCur = contentResolver.query(
                     ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_URI,
@@ -110,15 +142,15 @@ class ExportContactsScreenViewModel @Inject constructor(
                     arrayOf(id), null
                 )
 
-                addressCur?.apply {
-                    while (this.moveToNext()) {
+                addressCur?.use {
+                    while (it.moveToNext()) {
                         val addressIndex =
-                            this.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS)
-                        address = this.getString(addressIndex)
+                            it.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS)
+                        if (addressIndex >= 0) {
+                            address = it.getString(addressIndex)
+                        }
                     }
                 }
-
-                addressCur?.close()
 
                 // Check if the contact with this phone number already exists
                 val existingContact = contacts[phoneNumber]
@@ -126,8 +158,8 @@ class ExportContactsScreenViewModel @Inject constructor(
                 if (existingContact != null) {
                     // If the contact exists, update the fields (only if they are non-empty)
                     val updatedAddress =
-                        if (address.isNotEmpty()) address else existingContact.address
-                    val updatedEmail = if (email.isNotEmpty()) email else existingContact.email
+                        if (!address.isNullOrEmpty()) address else existingContact.address
+                    val updatedEmail = if (!email.isNullOrEmpty()) email else existingContact.email
 
                     // Update the contact in the map
                     contacts[phoneNumber] =
@@ -151,7 +183,14 @@ class ExportContactsScreenViewModel @Inject constructor(
         }
     }
 
-    fun exportContacts(context: Context) {
+    fun exportContacts(context: Context, format: String) {
+        when (format.lowercase()) {
+            "csv" -> exportCsv(context)
+            else -> exportVcf(context)
+        }
+    }
+
+    private fun exportVcf(context: Context) {
         val vCardData = StringBuilder()
         for (contact in _uiState.value.selectedContacts) {
             vCardData.append(createVCard(contact)).append("\n")
@@ -161,7 +200,31 @@ class ExportContactsScreenViewModel @Inject constructor(
             val fos = FileOutputStream(file)
             fos.write(vCardData.toString().toByteArray())
             fos.close()
-            shareVCardFile(context, file)
+            shareFile(context, file, "text/x-vcard")
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun exportCsv(context: Context) {
+        val csvData = StringBuilder()
+        csvData.append("name,phone,email,address\n")
+        for (contact in _uiState.value.selectedContacts) {
+            csvData.append(
+                listOf(
+                    contact.name,
+                    contact.phoneNumber ?: "",
+                    contact.email ?: "",
+                    contact.address ?: ""
+                ).joinToString(",") { escapeCsv(it) }
+            ).append("\n")
+        }
+        try {
+            val file = File(context.getExternalFilesDir(null), "contacts_export.csv")
+            val fos = FileOutputStream(file)
+            fos.write(csvData.toString().toByteArray())
+            fos.close()
+            shareFile(context, file, "text/csv")
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -179,7 +242,7 @@ class ExportContactsScreenViewModel @Inject constructor(
     """.trimIndent()
     }
 
-    private fun shareVCardFile(context: Context, file: File) {
+    private fun shareFile(context: Context, file: File, mimeType: String) {
         val uri: Uri = FileProvider.getUriForFile(
             context,
             "${context.packageName}.provider",
@@ -187,7 +250,7 @@ class ExportContactsScreenViewModel @Inject constructor(
         )
 
         val intent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/x-vcard"
+            type = mimeType
             putExtra(Intent.EXTRA_STREAM, uri)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
@@ -200,17 +263,26 @@ class ExportContactsScreenViewModel @Inject constructor(
     }
 
     fun showAdAndExportContacts(activity: Activity, context: Activity) {
+        showAdAndExportContacts(activity, context, "vcf")
+    }
+
+    fun showAdAndExportContacts(activity: Activity, context: Activity, format: String) {
         adManager.showRewardedAd(
             activity,
             onRewarded = {
-                exportContacts(context)
+                exportContacts(context, format)
             },
             onAdClosed = {
             },
             onAdFailedToShow = {
-                exportContacts(context)
+                exportContacts(context, format)
             }
         )
+    }
+
+    private fun escapeCsv(value: String): String {
+        val escaped = value.replace("\"", "\"\"")
+        return "\"$escaped\""
     }
 
 }
