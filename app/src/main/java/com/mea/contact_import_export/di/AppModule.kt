@@ -2,6 +2,7 @@ package com.mea.contact_import_export.di
 
 import android.content.Context
 import com.mea.contact_import_export.data.AdManager
+import com.mea.contact_import_export.data.PremiumManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -14,7 +15,10 @@ import javax.inject.Singleton
 object AppModule {
     @Provides
     @Singleton
-    fun provideAdManager(@ApplicationContext context: Context): AdManager {
-        return AdManager(context)
+    fun provideAdManager(
+        @ApplicationContext context: Context,
+        premiumManager: PremiumManager
+    ): AdManager {
+        return AdManager(context, premiumManager)
     }
 }

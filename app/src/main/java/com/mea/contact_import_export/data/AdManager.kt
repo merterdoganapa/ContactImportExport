@@ -15,17 +15,33 @@ import com.mea.contact_import_export.BuildConfig
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 @Singleton
 class AdManager @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val premiumManager: PremiumManager
 ) {
     private var rewardedAd: RewardedAd? = null
     private var isLoading = false
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     init {
-        MobileAds.initialize(context)
-        loadRewardedAd()
+        scope.launch {
+            premiumManager.isProUser.collect { isPro ->
+                if (isPro) {
+                    rewardedAd = null
+                    isLoading = false
+                } else {
+                    MobileAds.initialize(context)
+                    loadRewardedAd()
+                }
+            }
+        }
     }
 
     private fun loadRewardedAd() {
@@ -62,6 +78,12 @@ class AdManager @Inject constructor(
         onAdClosed: () -> Unit,
         onAdFailedToShow: () -> Unit
     ) {
+        if (premiumManager.isProUser.value) {
+            onRewarded()
+            onAdClosed()
+            return
+        }
+
         val rewardedAd = this.rewardedAd
 
         if (rewardedAd == null) {
@@ -103,6 +125,7 @@ class AdManager @Inject constructor(
     }
 
     fun isRewardedAdAvailable(): Boolean {
+        if (premiumManager.isProUser.value) return true
         return rewardedAd != null
     }
 

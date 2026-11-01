@@ -69,7 +69,7 @@ class ImportContactsScreenViewModel @Inject constructor(
         launcher?.launch(intent)
     }
 
-    fun processVcfFile(context: Context, uri: Uri) {
+    fun processVcfFile(context: Context, uri: Uri): Int {
         val contacts = mutableListOf<Contact>()
         try {
             val inputStream = context.contentResolver.openInputStream(uri)
@@ -110,6 +110,7 @@ class ImportContactsScreenViewModel @Inject constructor(
 
         _uiState.value = _uiState.value.copy(allContacts = contacts)
         println(contacts)
+        return contacts.size
     }
 
     fun addContactsToPhone(
@@ -208,16 +209,21 @@ class ImportContactsScreenViewModel @Inject constructor(
         _uiState.update { it.copy(searchText = searchText) }
     }
 
-    fun showAdAndProcessVcfFile(activity: Activity, context: Activity, uri: Uri) {
+    fun showAdAndProcessVcfFile(
+        activity: Activity,
+        context: Activity,
+        uri: Uri,
+        onCompleted: (Int) -> Unit = {}
+    ) {
         adManager.showRewardedAd(
             activity,
             onRewarded = {
-                processVcfFile(context, uri)
+                onCompleted(processVcfFile(context, uri))
             },
             onAdClosed = {
             },
             onAdFailedToShow = {
-                processVcfFile(context, uri)
+                onCompleted(processVcfFile(context, uri))
             }
         )
     }

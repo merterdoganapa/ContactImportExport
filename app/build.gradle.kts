@@ -15,8 +15,10 @@ android {
         applicationId = "com.mea.contact_import_export"
         minSdk = 28
         targetSdk = 35
-        versionCode = 8
-        versionName = "1.7"
+        versionCode = 21
+        versionName = "2.0"
+        buildConfigField("String", "REVENUECAT_ENTITLEMENT_PRO_ID", "\"pro_entitlement\"")
+        buildConfigField("String", "REVENUECAT_PRO_PRODUCT_ID", "\"pro\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -32,7 +34,7 @@ android {
                 "proguard-rules.pro"
             )
             buildConfigField("String", "REWARDED_AD_UNIT_ID", "\"ca-app-pub-8148037787730261/1683407907\"")
-
+            buildConfigField("String", "REVENUECAT_API_KEY", "\"goog_LmgUKkPKjQSGUszFsAgqcDmRste\"")
         }
         debug {
             isMinifyEnabled = false
@@ -41,6 +43,7 @@ android {
                 "proguard-rules.pro"
             )
             buildConfigField("String", "REWARDED_AD_UNIT_ID", "\"ca-app-pub-3940256099942544/5224354917\"")
+            buildConfigField("String", "REVENUECAT_API_KEY", "\"test_sSPhmafJgXITzFilCFulROGjGRL\"")
         }
 
     }
@@ -59,6 +62,9 @@ android {
         kotlinCompilerExtensionVersion = "1.5.1"
     }
     packaging {
+        jniLibs {
+            useLegacyPackaging = false
+        }
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
@@ -106,5 +112,6 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     implementation(libs.play.services.ads)
+    implementation(libs.revenuecat.purchases)
 
 }
